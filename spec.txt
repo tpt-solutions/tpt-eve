@@ -1,0 +1,522 @@
+TPT Eve: Design Document
+Vision
+TPT Eve is a cognitive architecture that moves beyond statistical pattern matching to build systems capable of genuine understanding, causal reasoning, and discovery. While LLMs excel at recognizing patterns in data, they lack the ability to understand why things happen, extract abstract principles, or discover genuinely new insights.
+TPT Eve combines neural networks (for pattern recognition) with symbolic reasoning, causal inference, and active learning to create a system that can actually think, not just predict.
+Core Philosophy
+The Problem with Current AI
+Statistical engines can only regurgitate - They remix patterns from training data
+Brute data doesn't scale understanding - More data ≠ more intelligence
+No causal reasoning - Correlation ≠ causation
+No abstraction - Can't transfer knowledge across domains
+No discovery - Can't find genuinely new insights
+The Human Learning Advantage
+Humans learn efficiently because we:
+Build causal models (understand why, not just what)
+Extract abstract principles from specific examples
+Transfer knowledge across domains
+Actively experiment and test hypotheses
+Monitor our own understanding (meta-cognition)
+TPT Eve's Approach
+Don't replace the statistical engine. Augment it. Use LLMs for what they're good at (pattern recognition, language understanding), then add layers for reasoning, causation, and discovery.
+Architecture Overview
+┌─────────────────────────────────────────────────────────────┐
+│                      TPT EVE ARCHITECTURE                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │         META-COGNITIVE LAYER                          │  │
+│  │  - Confidence tracking                                │  │
+│  │  - Knowledge gap detection                            │  │
+│  │  - Strategic learning decisions                       │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                           ↕                                  │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │         CAUSAL REASONING ENGINE                       │  │
+│  │  - Causal graph construction                          │  │
+│  │  - Intervention prediction                            │  │
+│  │  - Counterfactual simulation                          │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                           ↕                                  │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │         ABSTRACTION ENGINE                            │  │
+│  │  - Pattern extraction across domains                  │  │
+│  │  - Principle generalization                           │  │
+│  │  - Analogical reasoning                               │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                           ↕                                  │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │         SYMBOLIC REASONING LAYER                      │  │
+│  │  - Working memory (fact storage)                      │  │
+│  │  - Logical inference                                  │  │
+│  │  - Constraint satisfaction                            │  │
+│  │  - Backtracking & retry                               │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                           ↕                                  │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │         NEURAL PATTERN LAYER (LLM)                    │  │
+│  │  - Language understanding                             │  │
+│  │  - Pattern recognition                                │  │
+│  │  - Fact extraction from text                          │  │
+│  │  - Hypothesis generation                              │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                           ↕                                  │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │         ACTIVE LEARNING LOOP                          │  │
+│  │  - Hypothesis generation                              │  │
+│  │  - Experiment design                                  │  │
+│  │  - Result observation                                 │  │
+│  │  - Model updating                                     │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+Core Components
+1. Neural Pattern Layer (LLM Integration)
+Purpose: Extract patterns, facts, and relationships from text/data. Generate initial hypotheses.
+Implementation:
+Uses existing LLMs (local via TPT Spark, or cloud APIs)
+Prompt engineering for structured extraction
+Embedding generation for similarity search
+Key Functions:
+interface NeuralPatternLayer {
+  // Extract facts and relationships from text
+  extractFacts(text: string): Fact[];
+  
+  // Extract causal relationships
+  extractCausalRelations(text: string): CausalRelation[];
+  
+  // Generate hypotheses about a domain
+  generateHypotheses(domain: Domain, observations: Observation[]): Hypothesis[];
+  
+  // Generate embeddings for similarity search
+  embed(text: string): Embedding;
+  
+  // Find similar concepts/examples
+  findSimilar(query: string, candidates: string[]): SimilarityResult[];
+}
+Example Usage:
+const llm = new NeuralPatternLayer(model);
+
+// Extract facts from a TypeScript tutorial
+const facts = llm.extractFacts(`
+  TypeScript interfaces define object shapes.
+  They provide compile-time type checking.
+  They can extend other interfaces.
+`);
+
+// Output:
+// [
+//   { subject: "TypeScript interfaces", predicate: "define", object: "object shapes" },
+//   { subject: "TypeScript interfaces", predicate: "provide", object: "compile-time type checking" },
+//   { subject: "TypeScript interfaces", predicate: "can extend", object: "other interfaces" }
+// ]
+2. Symbolic Reasoning Layer
+Purpose: Hold facts in working memory, apply logical rules, backtrack on contradictions.
+Implementation:
+Custom rule engine (or integration with Prolog/Datalog)
+Working memory as a graph database
+Inference engine with forward/backward chaining
+Key Functions:
+interface SymbolicReasoningLayer {
+  // Add facts to working memory
+  addFact(fact: Fact): void;
+  
+  // Query working memory
+  query(pattern: Pattern): Fact[];
+  
+  // Apply logical rules
+  infer(rules: Rule[]): Inference[];
+  
+  // Check for contradictions
+  checkConsistency(): Contradiction[];
+  
+  // Backtrack and retry with different assumptions
+  backtrack(assumption: Assumption): void;
+}
+Example Usage:
+const symbolic = new SymbolicReasoningLayer();
+
+// Add facts
+symbolic.addFact({ subject: "TypeScript", predicate: "is", object: "programming language" });
+symbolic.addFact({ subject: "programming language", predicate: "has", object: "syntax" });
+symbolic.addFact({ subject: "TypeScript", predicate: "has", object: "type system" });
+
+// Add rules
+symbolic.addRule({
+  if: ["X is Y", "Y has Z"],
+  then: "X has Z"
+});
+
+// Infer
+const inferences = symbolic.infer();
+// Output: [{ subject: "TypeScript", predicate: "has", object: "syntax" }]
+3. Causal Reasoning Engine
+Purpose: Build causal graphs, predict effects of interventions, simulate counterfactuals.
+Implementation:
+Causal graph as a directed acyclic graph (DAG)
+Structural causal models (SCMs) for each relationship
+Intervention calculus (do-calculus)
+Key Functions:
+interface CausalReasoningEngine {
+  // Build causal graph from observations
+  buildCausalGraph(observations: Observation[]): CausalGraph;
+  
+  // Predict effect of intervention
+  predictIntervention(graph: CausalGraph, intervention: Intervention): Prediction;
+  
+  // Simulate counterfactual
+  simulateCounterfactual(graph: CausalGraph, counterfactual: Counterfactual): Simulation;
+  
+  // Identify confounders
+  identifyConfounders(graph: CausalGraph, treatment: string, outcome: string): string[];
+  
+  // Estimate causal effect
+  estimateCausalEffect(graph: CausalGraph, treatment: string, outcome: string): number;
+}
+Example Usage:
+const causal = new CausalReasoningEngine();
+
+// Build causal graph from data
+const graph = causal.buildCausalGraph([
+  { variables: { studyHours: 5, examScore: 85 } },
+  { variables: { studyHours: 3, examScore: 70 } },
+  { variables: { studyHours: 7, examScore: 92 } }
+]);
+
+// Predict: What happens if I study 10 hours?
+const prediction = causal.predictIntervention(graph, {
+  intervention: "do(studyHours = 10)",
+  outcome: "examScore"
+});
+// Output: { expectedScore: 95, confidence: 0.87 }
+
+// Counterfactual: What would have happened if I studied 2 more hours?
+const counterfactual = causal.simulateCounterfactual(graph, {
+  actualWorld: { studyHours: 5, examScore: 85 },
+  counterfactualWorld: { studyHours: 7 }
+});
+// Output: { expectedScore: 92 }
+4. Abstraction Engine
+Purpose: Extract abstract principles from specific examples, transfer knowledge across domains.
+Implementation:
+Pattern mining across multiple examples
+Analogical mapping between domains
+Principle generalization
+Key Functions:
+interface AbstractionEngine {
+  // Extract abstract principle from examples
+  extractPrinciple(examples: Example[]): Principle;
+  
+  // Find analogies between domains
+  findAnalogy(sourceDomain: Domain, targetDomain: Domain): Analogy;
+  
+  // Transfer knowledge to new domain
+  transferKnowledge(principle: Principle, newDomain: Domain): TransferredKnowledge;
+  
+  // Generalize from specific to abstract
+  generalize(concept: Concept): AbstractConcept;
+}
+Example Usage:
+const abstraction = new AbstractionEngine();
+
+// Extract principle from multiple examples
+const principle = abstraction.extractPrinciple([
+  { domain: "economics", example: "Supply and demand determine price" },
+  { domain: "ecology", example: "Predator-prey populations fluctuate" },
+  { domain: "physics", example: "Spring force balances mass displacement" }
+]);
+// Output: { 
+//   principle: "Equilibrium systems balance opposing forces",
+//   abstractionLevel: "high",
+//   domains: ["economics", "ecology", "physics"]
+// }
+
+// Find analogy between TypeScript and SQL
+const analogy = abstraction.findAnalogy(
+  { domain: "TypeScript", concepts: ["interfaces", "type checking", "compile-time"] },
+  { domain: "SQL", concepts: ["schemas", "constraints", "query validation"] }
+);
+// Output: {
+//   mapping: [
+//     { source: "interfaces", target: "schemas", relationship: "define structure" },
+//     { source: "type checking", target: "constraints", relationship: "enforce rules" },
+//     { source: "compile-time", target: "query validation", relationship: "prevent errors early" }
+//   ],
+//   confidence: 0.89
+// }
+5. Active Learning Loop
+Purpose: Generate hypotheses, design experiments, observe results, update models.
+Implementation:
+Hypothesis generation using LLM
+Experiment design (what to test, how to measure)
+Execution environment (code sandbox, API calls, simulations)
+Bayesian updating of beliefs
+Key Functions:
+interface ActiveLearningLoop {
+  // Generate hypotheses about a domain
+  generateHypotheses(domain: Domain, observations: Observation[]): Hypothesis[];
+  
+  // Design experiment to test hypothesis
+  designExperiment(hypothesis: Hypothesis): Experiment;
+  
+  // Execute experiment and observe results
+  executeExperiment(experiment: Experiment): Result;
+  
+  // Update model based on results
+  updateModel(hypothesis: Hypothesis, result: Result): UpdatedModel;
+  
+  // Decide what to learn next
+  decideNextLearning(model: Model, knowledgeGaps: Gap[]): LearningObjective;
+}
+Example Usage:
+const activeLearning = new ActiveLearningLoop();
+
+// Generate hypotheses about TypeScript performance
+const hypotheses = activeLearning.generateHypotheses(
+  { domain: "TypeScript performance" },
+  [
+    { observation: "Interface vs type alias performance differs" },
+    { observation: "Generic instantiation is slow" }
+  ]
+);
+// Output: [
+//   { hypothesis: "Interfaces are faster than type aliases for large objects", confidence: 0.6 },
+//   { hypothesis: "Generic constraints improve performance", confidence: 0.5 }
+// ]
+
+// Design experiment
+const experiment = activeLearning.designExperiment(hypotheses[0]);
+// Output: {
+//   hypothesis: "Interfaces are faster than type aliases for large objects",
+//   method: "Benchmark interface vs type alias with 100 properties",
+//   metrics: ["compilation time", "runtime performance"],
+//   control: "Same object structure, different declaration"
+// }
+
+// Execute experiment
+const result = await activeLearning.executeExperiment(experiment);
+// Output: {
+//   interfaceTime: 45ms,
+//   typeAliasTime: 52ms,
+//   difference: "15% faster",
+//   statisticallySignificant: true
+// }
+
+// Update model
+const updatedModel = activeLearning.updateModel(hypotheses[0], result);
+// Output: { hypothesis: "...", confidence: 0.89, evidence: [...] }
+6. Meta-Cognitive Layer
+Purpose: Track confidence, detect knowledge gaps, decide what to learn next.
+Implementation:
+Confidence scoring for all beliefs
+Knowledge gap detection (low confidence areas)
+Strategic learning decisions (what to prioritize)
+Key Functions:
+interface MetaCognitiveLayer {
+  // Track confidence in beliefs
+  trackConfidence(belief: Belief): Confidence;
+  
+  // Detect knowledge gaps
+  detectKnowledgeGaps(model: Model): KnowledgeGap[];
+  
+  // Decide what to learn next
+  decideLearningPriority(gaps: KnowledgeGap[]): LearningPriority;
+  
+  // Monitor understanding
+  monitorUnderstanding(query: string): UnderstandingLevel;
+  
+  // Request clarification when confused
+  requestClarification(confusion: Confusion): ClarificationRequest;
+}
+Example Usage:
+const metaCognitive = new MetaCognitiveLayer();
+
+// Track confidence
+const confidence = metaCognitive.trackConfidence({
+  belief: "TypeScript interfaces are faster than type aliases",
+  evidence: [experiment1, experiment2, experiment3]
+});
+// Output: { confidence: 0.87, evidenceCount: 3, consistency: 0.92 }
+
+// Detect knowledge gaps
+const gaps = metaCognitive.detectKnowledgeGaps(model);
+// Output: [
+//   { domain: "TypeScript generics", confidence: 0.3, gapType: "insufficient data" },
+//   { domain: "Advanced type patterns", confidence: 0.2, gapType: "contradictory evidence" }
+// ]
+
+// Decide what to learn next
+const priority = metaCognitive.decideLearningPriority(gaps);
+// Output: {
+//   priority: "TypeScript generics",
+//   reason: "Low confidence (0.3) and high relevance to current task",
+//   suggestedAction: "Generate 10 examples of generic patterns and test them"
+// }
+
+// Monitor understanding
+const understanding = metaCognitive.monitorUnderstanding("How do conditional types work?");
+// Output: { level: "partial", confidence: 0.6, gaps: ["distributive behavior", "infer keyword"] }
+Development Roadmap
+Phase 1: Foundation (Months 1-3)
+Goal: Build the core infrastructure and basic reasoning
+Deliverables:
+Neural Pattern Layer (LLM integration)
+Symbolic Reasoning Layer (basic rule engine)
+Working memory (fact storage)
+Simple inference (forward chaining)
+Success Criteria:
+Can extract facts from text
+Can apply simple logical rules
+Can answer "what is" questions
+Phase 2: Causal Reasoning (Months 4-6)
+Goal: Add causal understanding
+Deliverables:
+Causal graph construction
+Intervention prediction
+Basic counterfactual simulation
+Success Criteria:
+Can build causal graphs from data
+Can predict effects of interventions
+Can answer "what if" questions
+Phase 3: Abstraction (Months 7-9)
+Goal: Add cross-domain transfer
+Deliverables:
+Pattern extraction across domains
+Analogical reasoning
+Principle generalization
+Success Criteria:
+Can extract abstract principles from examples
+Can find analogies between domains
+Can transfer knowledge to new contexts
+Phase 4: Active Learning (Months 10-12)
+Goal: Add discovery capabilities
+Deliverables:
+Hypothesis generation
+Experiment design and execution
+Model updating
+Success Criteria:
+Can generate testable hypotheses
+Can design and run experiments
+Can discover new insights
+Phase 5: Meta-Cognition (Months 13-15)
+Goal: Add self-awareness
+Deliverables:
+Confidence tracking
+Knowledge gap detection
+Strategic learning decisions
+Success Criteria:
+Can track confidence in beliefs
+Can identify what it doesn't know
+Can prioritize learning
+Technical Stack
+Core Language
+Rust - Core reasoning engine (performance, safety)
+TypeScript - API layer, integration with TPT Spark
+Python - ML/AI components (LLM integration, embeddings)
+Key Libraries
+Causal Inference: dowhy, causalinference
+Symbolic Reasoning: Custom rule engine or souffle (Datalog)
+Graph Database: neo4j or rust-graph
+LLM Integration: tpt-spark (local) or OpenAI/Anthropic APIs
+Embeddings: sentence-transformers or custom
+Data Storage
+Working Memory: Graph database (facts, relationships)
+Causal Graphs: DAG storage with edge weights
+Knowledge Base: Vector database (embeddings) + graph database (structure)
+Example Use Cases
+Use Case 1: TypeScript Performance Optimization
+Scenario: User wants to optimize their TypeScript codebase
+TPT Eve Workflow:
+Neural Pattern Layer: Analyzes codebase, extracts patterns ("Generic instantiation is slow")
+Active Learning Loop: Generates hypothesis ("Using concrete types instead of generics improves performance")
+Experiment: Benchmarks generic vs concrete types
+Causal Reasoning: Determines that generics cause performance issues because of type instantiation overhead
+Abstraction: Extracts principle ("Abstraction layers add runtime cost")
+Recommendation: Suggests specific optimizations with causal explanations
+Output:
+Issue: Generic instantiation overhead
+Cause: TypeScript resolves generic types at compile time, adding to build time
+Effect: 15% slower compilation for files with complex generics
+Solution: Replace generic types with concrete types where possible
+Principle: Abstraction layers add runtime cost
+Confidence: 87%
+Use Case 2: Learning a New Domain (SQL)
+Scenario: User knows TypeScript, wants to learn SQL
+TPT Eve Workflow:
+Abstraction Engine: Finds analogies between TypeScript and SQL
+Interfaces ↔ Schemas
+Type checking ↔ Constraints
+Compile-time errors ↔ Query validation errors
+Transfer Knowledge: Maps TypeScript concepts to SQL concepts
+Meta-Cognitive Layer: Identifies knowledge gaps (SQL-specific concepts like JOINs, indexes)
+Active Learning Loop: Generates experiments to test understanding
+Causal Reasoning: Explains why indexes improve query performance
+Output:
+TypeScript Concept: Interface
+SQL Equivalent: Schema
+Analogy: Both define structure and enforce rules
+
+TypeScript Concept: Type checking
+SQL Equivalent: Constraints
+Analogy: Both prevent errors early
+
+Knowledge Gap: SQL JOINs
+Suggested Learning: 
+  1. Understand JOIN as "combining related data"
+  2. Analogy: Like merging two TypeScript objects based on a shared key
+  3. Experiment: Write queries with different JOIN types and observe results
+Use Case 3: Discovering Novel Insights
+Scenario: User wants to find new optimization patterns
+TPT Eve Workflow:
+Neural Pattern Layer: Analyzes multiple codebases, extracts patterns
+Abstraction Engine: Finds common patterns across domains
+Active Learning Loop: Generates hypotheses about novel optimizations
+Experiment: Tests hypotheses in sandbox
+Causal Reasoning: Determines why certain patterns work
+Discovery: Identifies new optimization technique
+Output:
+Novel Insight: Lazy type evaluation
+Pattern: Deferring type resolution until first use
+Cause: Reduces upfront compilation cost
+Effect: 30% faster initial load, 5% slower first access
+Principle: Trade upfront cost for deferred cost when usage is uncertain
+Confidence: 82%
+Evidence: Tested in 3 codebases, consistent results
+Challenges & Mitigations
+Challenge 1: LLM Hallucination
+Problem: LLMs generate false facts
+Mitigation:
+Cross-validate LLM outputs with symbolic reasoning
+Track confidence in all beliefs
+Require multiple sources of evidence
+Challenge 2: Causal Inference Complexity
+Problem: Building accurate causal graphs is hard
+Mitigation:
+Start with simple domains (TypeScript, SQL)
+Use intervention data when available
+Combine multiple causal discovery algorithms
+Challenge 3: Abstraction Quality
+Problem: Extracted abstractions may be too vague or too specific
+Mitigation:
+Use multiple examples from diverse domains
+Validate abstractions by testing transfer to new domains
+Iteratively refine abstractions
+Challenge 4: Experiment Execution
+Problem: Not all hypotheses can be tested automatically
+Mitigation:
+Focus on domains with clear execution environments (code, math, simulations)
+Use human-in-the-loop for complex experiments
+Start with simple, automatable experiments
+Success Metrics
+Technical Metrics
+Reasoning Accuracy: % of correct answers on reasoning benchmarks
+Causal Accuracy: % of correct causal predictions
+Abstraction Quality: % of successful knowledge transfers
+Discovery Rate: Number of novel insights generated
+User Metrics
+Time to Understanding: How quickly users learn new domains
+Insight Quality: User ratings of generated insights
+Confidence Calibration: Do confidence scores match actual accuracy?
+Business Metrics
+Adoption: Number of active users
+Retention: Do users come back?
+Impact: Does TPT Eve help users solve real problems?

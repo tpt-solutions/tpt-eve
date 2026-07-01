@@ -1,0 +1,22 @@
+[package]
+name = "eve-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "eve"
+path = "src/main.rs"
+
+[dependencies]
+eve-core = { workspace = true }
+eve-dsl = { workspace = true }
+eve-symbolic = { workspace = true }
+eve-neural = { workspace = true }
+clap = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
