@@ -15,4 +15,5 @@ eve-core = { workspace = true }
 eve-dsl = { workspace = true }
 eve-symbolic = { workspace = true }
 eve-neural = { workspace = true }
+eve-causal = { workspace = true }
 tokio = { workspace = true }

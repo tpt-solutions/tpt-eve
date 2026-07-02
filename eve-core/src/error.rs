@@ -25,4 +25,7 @@ pub enum EveError {
 
     #[error("config error: {0}")]
     Config(String),
+
+    #[error("causal error: {0}")]
+    Causal(String),
 }

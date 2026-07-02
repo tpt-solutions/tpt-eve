@@ -88,23 +88,25 @@ can answer "what is" questions.
 - [ ] Manual spot-check: `eve demo --backend ollama` and `eve demo --backend openrouter`
 - [ ] Commit
 
-## Phase 2 — Causal Reasoning (Months 4-6, future)
+## Phase 2 — Causal Reasoning (Months 4-6) ✓ COMPLETE
 
 Goal: causal graph construction, intervention prediction, basic counterfactual simulation.
 Success criteria: can build causal graphs from data, predict effects of interventions, answer
 "what if" questions.
 
-- [ ] New crate `eve-causal`: causal graph (DAG) construction from observations
+- [x] New crate `eve-causal`: causal graph (DAG) construction from observations
 - [ ] Revisit: extract a shared `causal-graph` core into `tpt-library`, evaluate back-porting
-      tpt-anima's `CausalGraph` onto it (tpt-anima's DFS cycle-detection pattern is a useful
-      template even though its edge-asserted contradiction model isn't a direct fit)
-- [ ] Structural causal models / intervention calculus (`do()` operator)
-- [ ] Counterfactual simulation
-- [ ] Confounder identification, causal effect estimation
-- [ ] Wire `NeuralPatternLayer::extract_causal_relations` into real causal graph construction
+      tpt-anima's `CausalGraph` onto it (DFS cycle-detection pattern was used here as a template;
+      full back-port deferred — Phase 1 notes on tpt-library still apply)
+- [x] Structural causal models / intervention calculus (`do()` operator) — linear SCM with
+      multivariate OLS, do-calculus via mutilated graph
+- [x] Counterfactual simulation — Pearl's abduction-action-prediction procedure
+- [x] Confounder identification, causal effect estimation
+- [x] Wire `NeuralPatternLayer::extract_causal_relations` into real causal graph construction
+      (via `CausalGraphBuilder`, demonstrated in `eve demo whatif`)
 - [ ] Evaluate adding `spark_embed` to tpt-spark if embeddings are needed earlier than Phase 3
-- [ ] Success-criteria tests: build causal graph from data, predict intervention effects, answer
-      "what if" questions
+- [x] Success-criteria tests: build causal graph from data, predict intervention effects, answer
+      "what if" questions (`eve-tests/tests/causal_phase2_acceptance.rs`, 7 tests green)
 
 ## Phase 3 — Abstraction (Months 7-9, future)
 
