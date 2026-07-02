@@ -15,7 +15,11 @@ impl Rule {
         conditions: Vec<(PatternTerm, PatternTerm, PatternTerm)>,
         conclusion: (PatternTerm, PatternTerm, PatternTerm),
     ) -> Self {
-        Rule { name, conditions, conclusion }
+        Rule {
+            name,
+            conditions,
+            conclusion,
+        }
     }
 
     /// Check if this rule's conditions are satisfied by the given bindings.
@@ -48,34 +52,58 @@ impl Rule {
 
         let (subject_pt, predicate_pt, object_pt) = &patterns[idx];
         for fact in facts {
-            if self.matches_fact_triple(fact, subject_pt, predicate_pt, object_pt, bindings) {
+            if let Some(new_bindings) =
+                self.try_bind(fact, subject_pt, predicate_pt, object_pt, bindings)
+            {
+                let orig_len = bindings.len();
+                bindings.extend(new_bindings);
                 self.check_conditions_recursive(facts, patterns, idx + 1, bindings, solutions);
+                bindings.truncate(orig_len);
             }
         }
     }
 
-    fn matches_fact_triple(
+    /// Try to unify a fact with a pattern triple given current bindings.
+    /// Returns the new variable→value pairs to add, or None if unification fails.
+    fn try_bind(
         &self,
         fact: &Fact,
         subject_pt: &PatternTerm,
         predicate_pt: &PatternTerm,
         object_pt: &PatternTerm,
         bindings: &[(String, Value)],
-    ) -> bool {
-        fn matches_term(pt: &PatternTerm, fv: &Value, bindings: &[(String, Value)]) -> bool {
+    ) -> Option<Vec<(String, Value)>> {
+        let mut new_bindings: Vec<(String, Value)> = Vec::new();
+
+        for (pt, fv) in [
+            (subject_pt, &fact.subject),
+            (predicate_pt, &fact.predicate),
+            (object_pt, &fact.object),
+        ] {
             match pt {
-                PatternTerm::Bound(bound) => bound == fv,
+                PatternTerm::Bound(bound) => {
+                    if bound != fv {
+                        return None;
+                    }
+                }
                 PatternTerm::Variable(var) => {
-                    bindings
+                    // Check existing bindings first, then new bindings from this call
+                    let existing = bindings
                         .iter()
-                        .any(|(name, val)| name == var && val == fv)
-                        || true // Variable can match anything (it binds)
+                        .find(|(name, _)| name == var)
+                        .or_else(|| new_bindings.iter().find(|(name, _)| name == var));
+                    if let Some((_, val)) = existing {
+                        if val != fv {
+                            return None;
+                        }
+                    } else {
+                        new_bindings.push((var.clone(), fv.clone()));
+                    }
                 }
             }
         }
-        matches_term(subject_pt, &fact.subject, bindings)
-            && matches_term(predicate_pt, &fact.predicate, bindings)
-            && matches_term(object_pt, &fact.object, bindings)
+
+        Some(new_bindings)
     }
 
     /// Apply the rule to generate inferred facts from bindings.
@@ -83,12 +111,14 @@ impl Rule {
         let subject = self.resolve_term(&self.conclusion.0, bindings)?;
         let predicate = self.resolve_term(&self.conclusion.1, bindings)?;
         let object = self.resolve_term(&self.conclusion.2, bindings)?;
-        
+
         Some(Fact {
             subject,
             predicate,
             object,
-            source: eve_core::FactSource::Inferred { rule_name: self.name.clone() },
+            source: eve_core::FactSource::Inferred {
+                rule_name: self.name.clone(),
+            },
             confidence: 0.9, // Inferred facts get slightly lower confidence
         })
     }
@@ -96,12 +126,10 @@ impl Rule {
     fn resolve_term(&self, pt: &PatternTerm, bindings: &[(String, Value)]) -> Option<Value> {
         match pt {
             PatternTerm::Bound(v) => Some(v.clone()),
-            PatternTerm::Variable(var) => {
-                bindings
-                    .iter()
-                    .find(|(name, _)| name == var)
-                    .map(|(_, v)| v.clone())
-            }
+            PatternTerm::Variable(var) => bindings
+                .iter()
+                .find(|(name, _)| name == var)
+                .map(|(_, v)| v.clone()),
         }
     }
 }

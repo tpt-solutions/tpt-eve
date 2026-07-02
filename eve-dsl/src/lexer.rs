@@ -34,7 +34,6 @@ pub enum Token {
 /// Lexer state tracking position in the source.
 #[derive(Debug, Clone)]
 pub struct Lexer<'a> {
-    source: &'a str,
     chars: std::iter::Peekable<std::str::Chars<'a>>,
     line: usize,
     column: usize,
@@ -43,7 +42,6 @@ pub struct Lexer<'a> {
 impl<'a> Lexer<'a> {
     pub fn new(source: &'a str) -> Self {
         Lexer {
-            source,
             chars: source.chars().peekable(),
             line: 1,
             column: 1,
@@ -145,36 +143,34 @@ impl<'a> Lexer<'a> {
 
         match self.advance() {
             None => Ok(Token::Eof),
-            Some(c) => {
-                match c {
-                    '.' => Ok(Token::Period),
-                    ',' => Ok(Token::Comma),
-                    '{' => Ok(Token::LBrace),
-                    '}' => Ok(Token::RBrace),
-                    '?' => Ok(Token::Question),
-                    '"' => {
-                        let lit = self.read_literal()?;
-                        Ok(Token::Literal(lit))
-                    }
-                    _ if c.is_alphabetic() || c == '_' => {
-                        let ident = self.read_ident(c);
-                        let lower = ident.to_lowercase();
-                        match lower.as_str() {
-                            "is" => Ok(Token::Is),
-                            "has" => Ok(Token::Has),
-                            "rule" => Ok(Token::Rule),
-                            "if" => Ok(Token::If),
-                            "then" => Ok(Token::Then),
-                            _ => Ok(Token::Ident(ident)),
-                        }
-                    }
-                    _ => Err(ParseError::new(
-                        format!("Unexpected character: '{}'", c),
-                        start_line,
-                        start_col,
-                    )),
+            Some(c) => match c {
+                '.' => Ok(Token::Period),
+                ',' => Ok(Token::Comma),
+                '{' => Ok(Token::LBrace),
+                '}' => Ok(Token::RBrace),
+                '?' => Ok(Token::Question),
+                '"' => {
+                    let lit = self.read_literal()?;
+                    Ok(Token::Literal(lit))
                 }
-            }
+                _ if c.is_alphabetic() || c == '_' => {
+                    let ident = self.read_ident(c);
+                    let lower = ident.to_lowercase();
+                    match lower.as_str() {
+                        "is" => Ok(Token::Is),
+                        "has" => Ok(Token::Has),
+                        "rule" => Ok(Token::Rule),
+                        "if" => Ok(Token::If),
+                        "then" => Ok(Token::Then),
+                        _ => Ok(Token::Ident(ident)),
+                    }
+                }
+                _ => Err(ParseError::new(
+                    format!("Unexpected character: '{}'", c),
+                    start_line,
+                    start_col,
+                )),
+            },
         }
     }
 
@@ -195,9 +191,15 @@ mod tests {
     fn lexes_simple_fact() {
         let source = r#"TypeScript is "programming language"."#;
         let mut lexer = Lexer::new(source);
-        assert_eq!(lexer.next_token().unwrap(), Token::Ident("TypeScript".into()));
+        assert_eq!(
+            lexer.next_token().unwrap(),
+            Token::Ident("TypeScript".into())
+        );
         assert_eq!(lexer.next_token().unwrap(), Token::Is);
-        assert_eq!(lexer.next_token().unwrap(), Token::Literal("programming language".into()));
+        assert_eq!(
+            lexer.next_token().unwrap(),
+            Token::Literal("programming language".into())
+        );
         assert_eq!(lexer.next_token().unwrap(), Token::Period);
         assert_eq!(lexer.next_token().unwrap(), Token::Eof);
     }
@@ -211,7 +213,10 @@ mod tests {
 "#;
         let mut lexer = Lexer::new(source);
         assert_eq!(lexer.next_token().unwrap(), Token::Rule);
-        assert_eq!(lexer.next_token().unwrap(), Token::Ident("transitive_has".into()));
+        assert_eq!(
+            lexer.next_token().unwrap(),
+            Token::Ident("transitive_has".into())
+        );
         assert_eq!(lexer.next_token().unwrap(), Token::LBrace);
         assert_eq!(lexer.next_token().unwrap(), Token::If);
         assert_eq!(lexer.next_token().unwrap(), Token::Ident("X".into()));
@@ -243,7 +248,10 @@ mod tests {
         let source = "? TypeScript has Z.";
         let mut lexer = Lexer::new(source);
         assert_eq!(lexer.next_token().unwrap(), Token::Question);
-        assert_eq!(lexer.next_token().unwrap(), Token::Ident("TypeScript".into()));
+        assert_eq!(
+            lexer.next_token().unwrap(),
+            Token::Ident("TypeScript".into())
+        );
         assert_eq!(lexer.next_token().unwrap(), Token::Has);
         assert_eq!(lexer.next_token().unwrap(), Token::Ident("Z".into()));
         assert_eq!(lexer.next_token().unwrap(), Token::Period);
@@ -254,8 +262,8 @@ mod tests {
     fn reports_unterminated_literal() {
         let source = r#"TypeScript is "programming language"#;
         let mut lexer = Lexer::new(source);
-        lexer.next_token(); // TypeScript
-        lexer.next_token(); // is
+        let _ = lexer.next_token(); // TypeScript
+        let _ = lexer.next_token(); // is
         let result = lexer.next_token();
         assert!(matches!(result, Err(ParseError { .. })));
     }

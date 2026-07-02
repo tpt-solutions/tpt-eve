@@ -1,6 +1,8 @@
 use eve_core::{Fact, Pattern, PatternTerm, Value};
 use eve_dsl::{QueryDef, RuleDef, Term, Triple};
 
+type PatternTriple = (PatternTerm, PatternTerm, PatternTerm);
+
 /// Convert a DSL Term to a core Value.
 pub fn term_to_value(term: &Term) -> Value {
     match term {
@@ -12,12 +14,20 @@ pub fn term_to_value(term: &Term) -> Value {
 
 /// Convert a DSL Triple to a core Fact (for asserted facts).
 pub fn triple_to_fact(triple: &Triple) -> Fact {
-    Fact::asserted(term_to_value(&triple.subject), term_to_value(&triple.predicate), term_to_value(&triple.object))
+    Fact::asserted(
+        term_to_value(&triple.subject),
+        term_to_value(&triple.predicate),
+        term_to_value(&triple.object),
+    )
 }
 
 /// Convert a DSL Triple to a Pattern for querying.
 pub fn triple_to_pattern(triple: &Triple) -> Pattern {
-    Pattern::new(term_to_pattern_term(&triple.subject), term_to_pattern_term(&triple.predicate), term_to_pattern_term(&triple.object))
+    Pattern::new(
+        term_to_pattern_term(&triple.subject),
+        term_to_pattern_term(&triple.predicate),
+        term_to_pattern_term(&triple.object),
+    )
 }
 
 /// Convert a DSL Term to a PatternTerm.
@@ -30,11 +40,17 @@ pub fn term_to_pattern_term(term: &Term) -> PatternTerm {
 }
 
 /// Convert a DSL RuleDef to runtime representation (stores terms as-is for matching).
-pub fn rule_to_runtime(rule: &RuleDef) -> (Vec<(PatternTerm, PatternTerm, PatternTerm)>, (PatternTerm, PatternTerm, PatternTerm)) {
-    let conditions: Vec<(PatternTerm, PatternTerm, PatternTerm)> = rule
+pub fn rule_to_runtime(rule: &RuleDef) -> (Vec<PatternTriple>, PatternTriple) {
+    let conditions: Vec<PatternTriple> = rule
         .conditions
         .iter()
-        .map(|t| (term_to_pattern_term(&t.subject), term_to_pattern_term(&t.predicate), term_to_pattern_term(&t.object)))
+        .map(|t| {
+            (
+                term_to_pattern_term(&t.subject),
+                term_to_pattern_term(&t.predicate),
+                term_to_pattern_term(&t.object),
+            )
+        })
         .collect();
     let conclusion = (
         term_to_pattern_term(&rule.conclusion.subject),

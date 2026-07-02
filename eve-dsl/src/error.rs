@@ -10,13 +10,21 @@ pub struct ParseError {
 
 impl ParseError {
     pub fn new(message: String, line: usize, column: usize) -> Self {
-        ParseError { message, line, column }
+        ParseError {
+            message,
+            line,
+            column,
+        }
     }
 }
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Parse error at line {}, column {}: {}", self.line, self.column, self.message)
+        write!(
+            f,
+            "Parse error at line {}, column {}: {}",
+            self.line, self.column, self.message
+        )
     }
 }
 

@@ -50,7 +50,13 @@ pub struct Fact {
 
 impl Fact {
     pub fn asserted(subject: Value, predicate: Value, object: Value) -> Self {
-        Fact { subject, predicate, object, source: FactSource::Asserted, confidence: 1.0 }
+        Fact {
+            subject,
+            predicate,
+            object,
+            source: FactSource::Asserted,
+            confidence: 1.0,
+        }
     }
 
     /// Whether two facts share the same (subject, predicate, object) triple,
@@ -109,6 +115,9 @@ mod tests {
     #[test]
     fn value_display() {
         assert_eq!(Value::Symbol("TypeScript".into()).to_string(), "TypeScript");
-        assert_eq!(Value::Text("type system".into()).to_string(), "\"type system\"");
+        assert_eq!(
+            Value::Text("type system".into()).to_string(),
+            "\"type system\""
+        );
     }
 }

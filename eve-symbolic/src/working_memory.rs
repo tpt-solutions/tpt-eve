@@ -35,14 +35,8 @@ impl WorkingMemory {
             }
         }
 
-        // Remove lower-confidence duplicates of the same triple
-        self.facts.retain(|existing| {
-            if existing.same_triple(&fact) {
-                existing.confidence < fact.confidence
-            } else {
-                true
-            }
-        });
+        // Remove any existing fact with the same triple before inserting the higher-confidence one
+        self.facts.retain(|existing| !existing.same_triple(&fact));
 
         // Rebuild indexes
         self.by_subject.clear();
@@ -145,30 +139,33 @@ impl WorkingMemory {
 
     fn find_candidates(&self, pattern: &Pattern) -> Vec<Fact> {
         // Narrow candidates by any bound slots
-        let candidate_indices: Vec<usize> = match (&pattern.subject, &pattern.predicate, &pattern.object)
-        {
-            (PatternTerm::Bound(Value::Symbol(s)), _, _) => {
-                self.by_subject.get(s).cloned().unwrap_or_default()
-            }
-            (_, PatternTerm::Bound(Value::Symbol(p)), _) => {
-                self.by_predicate.get(p).cloned().unwrap_or_default()
-            }
-            (_, _, PatternTerm::Bound(Value::Symbol(o))) => {
-                self.by_object.get(o).cloned().unwrap_or_default()
-            }
-            (PatternTerm::Bound(Value::Text(s)), _, _) => {
-                self.by_subject.get(s).cloned().unwrap_or_default()
-            }
-            (_, PatternTerm::Bound(Value::Text(p)), _) => {
-                self.by_predicate.get(p).cloned().unwrap_or_default()
-            }
-            (_, _, PatternTerm::Bound(Value::Text(o))) => {
-                self.by_object.get(o).cloned().unwrap_or_default()
-            }
-            _ => (0..self.facts.len()).collect(),
-        };
+        let candidate_indices: Vec<usize> =
+            match (&pattern.subject, &pattern.predicate, &pattern.object) {
+                (PatternTerm::Bound(Value::Symbol(s)), _, _) => {
+                    self.by_subject.get(s).cloned().unwrap_or_default()
+                }
+                (_, PatternTerm::Bound(Value::Symbol(p)), _) => {
+                    self.by_predicate.get(p).cloned().unwrap_or_default()
+                }
+                (_, _, PatternTerm::Bound(Value::Symbol(o))) => {
+                    self.by_object.get(o).cloned().unwrap_or_default()
+                }
+                (PatternTerm::Bound(Value::Text(s)), _, _) => {
+                    self.by_subject.get(s).cloned().unwrap_or_default()
+                }
+                (_, PatternTerm::Bound(Value::Text(p)), _) => {
+                    self.by_predicate.get(p).cloned().unwrap_or_default()
+                }
+                (_, _, PatternTerm::Bound(Value::Text(o))) => {
+                    self.by_object.get(o).cloned().unwrap_or_default()
+                }
+                _ => (0..self.facts.len()).collect(),
+            };
 
-        candidate_indices.into_iter().map(|i| self.facts[i].clone()).collect()
+        candidate_indices
+            .into_iter()
+            .map(|i| self.facts[i].clone())
+            .collect()
     }
 
     fn matches_pattern(&self, fact: &Fact, pattern: &Pattern) -> bool {
@@ -285,7 +282,10 @@ mod tests {
 
         let solutions = wm.query_conjunctive(&patterns);
         assert_eq!(solutions.len(), 1);
-        assert_eq!(solutions[0].get("Y"), Some(&Value::Symbol("programming language".into())));
+        assert_eq!(
+            solutions[0].get("Y"),
+            Some(&Value::Symbol("programming language".into()))
+        );
         assert_eq!(solutions[0].get("Z"), Some(&Value::Symbol("syntax".into())));
     }
 }

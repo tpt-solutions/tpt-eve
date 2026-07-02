@@ -16,15 +16,23 @@ pub struct InferenceEngine {
 
 impl InferenceEngine {
     pub fn new() -> Self {
-        InferenceEngine { max_iterations: 100 }
+        InferenceEngine {
+            max_iterations: 100,
+        }
     }
 
     pub fn with_max_iterations(max: usize) -> Self {
-        InferenceEngine { max_iterations: max }
+        InferenceEngine {
+            max_iterations: max,
+        }
     }
 
     /// Run forward chaining until fixpoint (no new facts derived) or iteration cap.
-    pub fn forward_chain(&self, wm: &mut crate::working_memory::WorkingMemory, rules: &[Rule]) -> Vec<Inference> {
+    pub fn forward_chain(
+        &self,
+        wm: &mut crate::working_memory::WorkingMemory,
+        rules: &[Rule],
+    ) -> Vec<Inference> {
         let mut inferences = Vec::new();
         let mut iterations = 0;
 
@@ -41,9 +49,11 @@ impl InferenceEngine {
                 for bindings in solutions {
                     if let Some(derived) = rule.apply(&bindings) {
                         // Check if this fact already exists with higher or equal confidence
-                        if !wm.facts().iter().any(|f| {
-                            f.same_triple(&derived) && f.confidence >= derived.confidence
-                        }) {
+                        if !wm
+                            .facts()
+                            .iter()
+                            .any(|f| f.same_triple(&derived) && f.confidence >= derived.confidence)
+                        {
                             new_facts.push(derived);
                         }
                     }
@@ -104,8 +114,16 @@ mod tests {
         let rule = Rule::new(
             Some("transitive_has".into()),
             vec![
-                (PatternTerm::Variable("X".into()), PatternTerm::Bound(Value::Symbol("is".into())), PatternTerm::Variable("Y".into())),
-                (PatternTerm::Variable("Y".into()), PatternTerm::Bound(Value::Symbol("has".into())), PatternTerm::Variable("Z".into())),
+                (
+                    PatternTerm::Variable("X".into()),
+                    PatternTerm::Bound(Value::Symbol("is".into())),
+                    PatternTerm::Variable("Y".into()),
+                ),
+                (
+                    PatternTerm::Variable("Y".into()),
+                    PatternTerm::Bound(Value::Symbol("has".into())),
+                    PatternTerm::Variable("Z".into()),
+                ),
             ],
             (
                 PatternTerm::Variable("X".into()),
@@ -116,7 +134,7 @@ mod tests {
 
         let engine = InferenceEngine::new();
         let inferences = engine.forward_chain(&mut wm, &[rule]);
-        
+
         assert_eq!(inferences.len(), 1);
         assert!(inferences[0].derived.subject == Value::Symbol("TypeScript".into()));
         assert!(inferences[0].derived.predicate == Value::Symbol("has".into()));
@@ -140,9 +158,11 @@ mod tests {
         // Rule: if X is Y then Y is X (symmetric)
         let rule = Rule::new(
             Some("symmetric".into()),
-            vec![
-                (PatternTerm::Variable("X".into()), PatternTerm::Bound(Value::Symbol("is".into())), PatternTerm::Variable("Y".into())),
-            ],
+            vec![(
+                PatternTerm::Variable("X".into()),
+                PatternTerm::Bound(Value::Symbol("is".into())),
+                PatternTerm::Variable("Y".into()),
+            )],
             (
                 PatternTerm::Variable("Y".into()),
                 PatternTerm::Bound(Value::Symbol("is".into())),
@@ -152,7 +172,7 @@ mod tests {
 
         let engine = InferenceEngine::new();
         let inferences = engine.forward_chain(&mut wm, &[rule]);
-        
+
         // Should derive: B is A, C is B (then on next iteration: A is B exists, C is B derived, etc.)
         assert!(!inferences.is_empty());
     }

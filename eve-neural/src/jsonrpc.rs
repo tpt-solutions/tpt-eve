@@ -1,14 +1,8 @@
 use eve_core::EveError;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 
-#[cfg(windows)]
-use tokio::net::TcpStream;
-
-#[cfg(unix)]
-use tokio::net::UnixStream;
-
-/// JSON-RPC request/response for communication with tpt-spark.
+/// JSON-RPC 2.0 request envelope.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JsonRpcRequest {
     pub jsonrpc: String,
@@ -17,6 +11,7 @@ pub struct JsonRpcRequest {
     pub id: u64,
 }
 
+/// JSON-RPC 2.0 response envelope.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JsonRpcResponse {
     pub jsonrpc: String,
@@ -31,40 +26,54 @@ pub struct JsonRpcError {
     pub message: String,
 }
 
-/// JSON-RPC client for communicating with tpt-spark (Unix socket) or other backends.
+/// Newline-delimited JSON-RPC client over any async read/write stream.
 pub struct JsonRpcClient {
-    #[cfg(windows)]
-    stream: TcpStream,
-    #[cfg(unix)]
-    stream: UnixStream,
+    reader: BufReader<Box<dyn tokio::io::AsyncRead + Unpin + Send>>,
+    writer: Box<dyn tokio::io::AsyncWrite + Unpin + Send>,
     next_id: u64,
 }
 
 impl JsonRpcClient {
+    pub fn new(
+        reader: impl tokio::io::AsyncRead + Unpin + Send + 'static,
+        writer: impl tokio::io::AsyncWrite + Unpin + Send + 'static,
+    ) -> Self {
+        JsonRpcClient {
+            reader: BufReader::new(Box::new(reader)),
+            writer: Box::new(writer),
+            next_id: 1,
+        }
+    }
+
+    /// Connect via Windows named pipe.
     #[cfg(windows)]
-    pub async fn connect(_pipe_path: &str) -> Result<Self, EveError> {
-        // On Windows, use TCP for now (tpt-spark may use TCP or named pipe)
-        let stream = TcpStream::connect("127.0.0.1:0")
-            .await
-            .map_err(|e| EveError::Transport(format!("Failed to connect: {}", e)))?;
-        Ok(JsonRpcClient {
-            stream,
-            next_id: 1,
-        })
+    pub async fn connect_pipe(pipe_name: &str) -> Result<Self, EveError> {
+        use tokio::net::windows::named_pipe::ClientOptions;
+        let pipe = ClientOptions::new().open(pipe_name).map_err(|e| {
+            EveError::Transport(format!("Failed to open pipe {}: {}", pipe_name, e))
+        })?;
+        let (r, w) = tokio::io::split(pipe);
+        Ok(Self::new(r, w))
     }
 
-    #[cfg(unix)]
-    pub async fn connect(socket_path: &str) -> Result<Self, EveError> {
-        let stream = UnixStream::connect(socket_path)
+    /// Connect via Unix domain socket.
+    #[cfg(not(windows))]
+    pub async fn connect_socket(socket_path: &str) -> Result<Self, EveError> {
+        let stream = tokio::net::UnixStream::connect(socket_path)
             .await
-            .map_err(|e| EveError::Transport(format!("Failed to connect to socket: {}", e)))?;
-        Ok(JsonRpcClient {
-            stream,
-            next_id: 1,
-        })
+            .map_err(|e| {
+                EveError::Transport(format!("Failed to connect to {}: {}", socket_path, e))
+            })?;
+        let (r, w) = tokio::io::split(stream);
+        Ok(Self::new(r, w))
     }
 
-    pub async fn request<T: DeserializeOwned>(&mut self, method: &str, params: serde_json::Value) -> Result<T, EveError> {
+    /// Send a JSON-RPC request and return the decoded result.
+    pub async fn request<T: DeserializeOwned>(
+        &mut self,
+        method: &str,
+        params: serde_json::Value,
+    ) -> Result<T, EveError> {
         let req = JsonRpcRequest {
             jsonrpc: "2.0".to_string(),
             method: method.to_string(),
@@ -73,23 +82,66 @@ impl JsonRpcClient {
         };
         self.next_id += 1;
 
-        let req_bytes = serde_json::to_vec(&req).map_err(|e| EveError::ExtractionParseFailed(e.to_string()))?;
-        
-        self.stream.write_all(&req_bytes).await.map_err(|e| EveError::Transport(e.to_string()))?;
-        self.stream.write_all(b"\n").await.map_err(|e| EveError::Transport(e.to_string()))?;
+        let mut req_bytes =
+            serde_json::to_vec(&req).map_err(|e| EveError::ExtractionParseFailed(e.to_string()))?;
+        req_bytes.push(b'\n');
 
-        let mut response_bytes = Vec::new();
-        self.stream.read_to_end(&mut response_bytes).await.map_err(|e| EveError::Transport(e.to_string()))?;
+        self.writer
+            .write_all(&req_bytes)
+            .await
+            .map_err(|e| EveError::Transport(e.to_string()))?;
 
-        let response: JsonRpcResponse = serde_json::from_slice(&response_bytes)
+        let mut line = String::new();
+        self.reader
+            .read_line(&mut line)
+            .await
+            .map_err(|e| EveError::Transport(e.to_string()))?;
+
+        let response: JsonRpcResponse = serde_json::from_str(line.trim())
             .map_err(|e| EveError::ExtractionParseFailed(e.to_string()))?;
-        
+
         if let Some(err) = response.error {
-            return Err(EveError::Rpc { code: err.code, message: err.message });
+            return Err(EveError::Rpc {
+                code: err.code,
+                message: err.message,
+            });
         }
 
-        response.result
+        response
+            .result
             .ok_or_else(|| EveError::ExtractionParseFailed("No result in response".to_string()))
-            .and_then(|v| serde_json::from_value(v).map_err(|e| EveError::ExtractionParseFailed(e.to_string())))
+            .and_then(|v| {
+                serde_json::from_value(v)
+                    .map_err(|e| EveError::ExtractionParseFailed(e.to_string()))
+            })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[tokio::test]
+    async fn round_trips_request_response() {
+        let request = json!({"result": 42, "id": 1, "jsonrpc": "2.0", "error": null});
+        let response_bytes = format!("{}\n", request);
+
+        let (server_reader, client_writer) = tokio::io::duplex(1024);
+        let (client_reader, mut server_writer) = tokio::io::duplex(1024);
+
+        tokio::spawn(async move {
+            let mut buf = String::new();
+            let mut reader = BufReader::new(server_reader);
+            reader.read_line(&mut buf).await.unwrap();
+            server_writer
+                .write_all(response_bytes.as_bytes())
+                .await
+                .unwrap();
+        });
+
+        let mut client = JsonRpcClient::new(client_reader, client_writer);
+        let result: u64 = client.request("test_method", json!({})).await.unwrap();
+        assert_eq!(result, 42);
     }
 }

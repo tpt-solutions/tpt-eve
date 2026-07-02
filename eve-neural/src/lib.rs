@@ -1,13 +1,19 @@
+mod cloud_backend;
 mod jsonrpc;
 mod mock_backend;
-mod prompts;
+mod ollama_backend;
+pub(crate) mod prompts;
+mod spark_backend;
 
 use async_trait::async_trait;
 use eve_core::{CausalRelationDraft, Fact};
 use serde::{Deserialize, Serialize};
 
+pub use cloud_backend::CloudNeuralLayer;
 pub use jsonrpc::JsonRpcClient;
 pub use mock_backend::MockNeuralLayer;
+pub use ollama_backend::OllamaNeuralLayer;
+pub use spark_backend::SparkNeuralLayer;
 
 /// Embedding vector for similarity search.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -37,13 +43,13 @@ pub trait NeuralPatternLayer: Send + Sync {
         &self,
         text: &str,
     ) -> Result<Vec<CausalRelationDraft>, eve_core::EveError> {
-        let _ = (text);
+        let _ = text;
         Err(eve_core::EveError::NotSupported("extract_causal_relations"))
     }
 
     /// Generate embeddings for the given text (optional, returns NotSupported by default).
     async fn embed(&self, text: &str) -> Result<Embedding, eve_core::EveError> {
-        let _ = (text);
+        let _ = text;
         Err(eve_core::EveError::NotSupported("embed"))
     }
 

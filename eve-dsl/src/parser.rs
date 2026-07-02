@@ -22,7 +22,10 @@ impl Parser {
                 Ok(tok) => tokens.push((tok, line, col)),
             }
         }
-        Parser { tokens, position: 0 }
+        Parser {
+            tokens,
+            position: 0,
+        }
     }
 
     pub fn parse(source: &str) -> Result<Program, ParseError> {
@@ -124,11 +127,14 @@ impl Parser {
         }
         self.expect(Token::Then)?;
         let conclusion = self.parse_triple(true)?;
-        // Skip RBrace if present (optional for readability)
+        // Skip RBrace if present
         if self.current() == &Token::RBrace {
             self.advance();
         }
-        self.expect(Token::Period)?;
+        // Skip optional trailing period after rules
+        if self.current() == &Token::Period {
+            self.advance();
+        }
         Ok(Statement::Rule(RuleDef {
             name,
             conditions,
@@ -143,7 +149,13 @@ impl Parser {
         let predicate = self.parse_term(false)?;
         let object = self.parse_term(true)?; // Allow variables in object position
         self.expect(Token::Period)?;
-        Ok(Statement::Query(QueryDef { clauses: vec![Triple { subject, predicate, object }] }))
+        Ok(Statement::Query(QueryDef {
+            clauses: vec![Triple {
+                subject,
+                predicate,
+                object,
+            }],
+        }))
     }
 
     fn parse_triple(&mut self, in_rule: bool) -> Result<Triple, ParseError> {
@@ -252,7 +264,7 @@ mod tests {
     #[test]
     fn parses_multiple_facts() {
         let source = r#"TypeScript is "programming language".
-programming language has "syntax"."#;
+"programming language" has syntax."#;
         let program = Parser::parse(source).unwrap();
         assert_eq!(program.statements.len(), 2);
     }

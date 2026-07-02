@@ -1,5 +1,10 @@
 TypeScript is "programming language".
-programming language has syntax.
-programming language has semantics.
+"programming language" has syntax.
+"programming language" has semantics.
 TypeScript provides "compile-time type checking".
-TypeScript compiles to "JavaScript".
+TypeScript compiles "to JavaScript".
+
+rule transitive_has {
+  if X is Y, Y has Z
+  then X has Z
+}

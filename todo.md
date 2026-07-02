@@ -12,13 +12,13 @@ architecture detail.
 - [x] `.gitignore` (copied from tpt-anima)
 - [x] Workspace root `Cargo.toml` with 6 crate members + `[workspace.dependencies]`
 - [x] Scaffold `eve-core/` (`Cargo.toml` + `src/`)
-- [ ] Scaffold `eve-dsl/` (`Cargo.toml` + `src/`)
-- [ ] Scaffold `eve-symbolic/` (`Cargo.toml` + `src/`)
-- [ ] Scaffold `eve-neural/` (`Cargo.toml` + `src/`)
-- [ ] Scaffold `eve-cli/` (`Cargo.toml` + `src/main.rs`)
+- [x] Scaffold `eve-dsl/` (`Cargo.toml` + `src/`)
+- [x] Scaffold `eve-symbolic/` (`Cargo.toml` + `src/`)
+- [x] Scaffold `eve-neural/` (`Cargo.toml` + `src/`)
+- [x] Scaffold `eve-cli/` (`Cargo.toml` + `src/main.rs`)
 - [x] Scaffold `eve-tests/` (`Cargo.toml`, `publish = false`)
-- [ ] Verify `cargo build --workspace` passes clean
-- [ ] Verify `cargo clippy --workspace -- -D warnings` passes clean
+- [x] Verify `cargo build --workspace` passes clean
+- [x] Verify `cargo clippy --workspace -- -D warnings` passes clean
 - [x] Write `CLAUDE.md`
 - [x] Write `README.md`
 
@@ -36,54 +36,54 @@ can answer "what is" questions.
 - [x] Unit tests: Value/Fact/Pattern equality, hashing, serde round-trip
 
 ### 1.2 Rule DSL (`eve-dsl`)
-- [ ] `lexer.rs` — `Token`, `Lexer`
-- [ ] `ast.rs` — `Term`, `Triple`, `RuleDef`, `QueryDef`, `Statement`, `Program`
-- [ ] `parser.rs` — recursive-descent parser
-- [ ] `error.rs` — `ParseError` with line/col spans
-- [ ] `lib.rs` — `pub fn parse(source: &str) -> Result<Program, ParseError>`
-- [ ] Unit tests: lex/parse facts, rules, multi-clause queries, error cases
-- [ ] `eve-cli/fixtures/typescript_example.eve` — DSL fixture for the demo
+- [x] `lexer.rs` — `Token`, `Lexer`
+- [x] `ast.rs` — `Term`, `Triple`, `RuleDef`, `QueryDef`, `Statement`, `Program`
+- [x] `parser.rs` — recursive-descent parser
+- [x] `error.rs` — `ParseError` with line/col spans
+- [x] `lib.rs` — `pub fn parse(source: &str) -> Result<Program, ParseError>`
+- [x] Unit tests: lex/parse facts, rules, multi-clause queries, error cases
+- [x] `eve-cli/fixtures/typescript_example.eve` — DSL fixture for the demo
 
 ### 1.3 Working Memory (`eve-symbolic`)
-- [ ] `working_memory.rs` — `WorkingMemory`, indexes, `add_fact`, `query`, `query_conjunctive`
-- [ ] `lowering.rs` — DSL AST → `eve_core`/`eve_symbolic` runtime types
-- [ ] `persistence.rs` — redb-backed `WorkingMemoryStore` (save/load snapshot)
-- [ ] Unit tests: add_fact dedup, query unification, conjunctive join, persistence round-trip
+- [x] `working_memory.rs` — `WorkingMemory`, indexes, `add_fact`, `query`, `query_conjunctive`
+- [x] `lowering.rs` — DSL AST → `eve_core`/`eve_symbolic` runtime types
+- [x] `persistence.rs` — redb-backed `WorkingMemoryStore` (save/load snapshot)
+- [x] Unit tests: add_fact dedup, query unification, conjunctive join, persistence round-trip
 
 ### 1.4 Inference Engine (`eve-symbolic`)
-- [ ] `rule.rs` — `Rule`
-- [ ] `inference.rs` — `InferenceEngine::forward_chain`, `Inference`
-- [ ] `consistency.rs` — `ConsistencyChecker`, `Contradiction`
-- [ ] `backtrack.rs` — stub matching spec interface (`NotSupported` in Phase 1)
-- [ ] `qa.rs` — "what is"/attribute question → `Pattern` translation
-- [ ] `layer.rs` — `SymbolicReasoningLayer` facade
-- [ ] Unit tests: forward-chain fixpoint + transitive-rule scenario, consistency true/false
+- [x] `rule.rs` — `Rule`
+- [x] `inference.rs` — `InferenceEngine::forward_chain`, `Inference`
+- [x] `consistency.rs` — `ConsistencyChecker`, `Contradiction`
+- [x] `backtrack.rs` — stub matching spec interface (`NotSupported` in Phase 1)
+- [x] `qa.rs` — "what is"/attribute question → `Pattern` translation
+- [x] `layer.rs` — `SymbolicReasoningLayer` facade
+- [x] Unit tests: forward-chain fixpoint + transitive-rule scenario, consistency true/false
       positives, QA translation
 
 ### 1.5 Neural Pattern Layer (`eve-neural`)
-- [ ] `lib.rs` — `NeuralPatternLayer` trait (`async_trait`)
-- [ ] `jsonrpc.rs` — newline-delimited JSON-RPC client over named pipe (Windows) / unix socket
-- [ ] `spark_backend.rs` — `SparkNeuralLayer` (extract_facts, extract_causal_relations via spark_infer)
-- [ ] `ollama_backend.rs` — `OllamaNeuralLayer` (HTTP, supports `embed()`)
-- [ ] `cloud_backend.rs` — `CloudNeuralLayer` (Anthropic, OpenAI, OpenRouter)
-- [ ] `mock_backend.rs` — `MockNeuralLayer` deterministic fixture backend
-- [ ] `prompts.rs` — fact-extraction + causal-extraction prompt templates
-- [ ] Unit tests: prompt formatting, response JSON parsing (clean/prose-wrapped/malformed),
+- [x] `lib.rs` — `NeuralPatternLayer` trait (`async_trait`)
+- [x] `jsonrpc.rs` — newline-delimited JSON-RPC client over named pipe (Windows) / unix socket
+- [x] `spark_backend.rs` — `SparkNeuralLayer` (extract_facts, extract_causal_relations via spark_infer)
+- [x] `ollama_backend.rs` — `OllamaNeuralLayer` (HTTP, supports `embed()`)
+- [x] `cloud_backend.rs` — `CloudNeuralLayer` (Anthropic, OpenAI, OpenRouter)
+- [x] `mock_backend.rs` — `MockNeuralLayer` deterministic fixture backend
+- [x] `prompts.rs` — fact-extraction + causal-extraction prompt templates
+- [x] Unit tests: prompt formatting, response JSON parsing (clean/prose-wrapped/malformed),
       JSON-RPC framing via `tokio::io::duplex`, `MockNeuralLayer` conformance
 
 ### 1.6 CLI / Vertical Slice (`eve-cli`)
-- [ ] `main.rs` — clap subcommands: `extract`, `demo`, `ask`
-- [ ] `--backend mock|spark|ollama|anthropic|openai|openrouter` flag
-- [ ] Wire `eve demo` end-to-end pipeline (extract → assert → parse rule → forward_chain →
+- [x] `main.rs` — clap subcommands: `extract`, `demo`, `ask`
+- [x] `--backend mock|spark|ollama|anthropic|openai|openrouter` flag
+- [x] Wire `eve demo` end-to-end pipeline (extract → assert → parse rule → forward_chain →
       consistency check → ask)
 
 ### 1.7 Integration Test (`eve-tests`)
-- [ ] `tests/typescript_example_end_to_end.rs` — full Phase 1 acceptance test using `MockNeuralLayer`
+- [x] `tests/typescript_example_end_to_end.rs` — full Phase 1 acceptance test using `MockNeuralLayer`
 
 ### 1.8 Phase 1 Exit Criteria
-- [ ] `cargo test --workspace` green
-- [ ] `cargo clippy --workspace -- -D warnings` green
-- [ ] `cargo fmt --all -- --check` green
+- [x] `cargo test --workspace` green
+- [x] `cargo clippy --workspace -- -D warnings` green
+- [x] `cargo fmt --all -- --check` green
 - [ ] Manual run: `eve demo --backend spark` against a real loaded tpt-spark model
 - [ ] Manual spot-check: `eve demo --backend ollama` and `eve demo --backend openrouter`
 - [ ] Commit

@@ -20,6 +20,10 @@ pub struct Pattern {
 
 impl Pattern {
     pub fn new(subject: PatternTerm, predicate: PatternTerm, object: PatternTerm) -> Self {
-        Pattern { subject, predicate, object }
+        Pattern {
+            subject,
+            predicate,
+            object,
+        }
     }
 }

@@ -37,7 +37,8 @@ impl SymbolicReasoningLayer {
 
     /// Run forward-chaining inference.
     pub fn infer(&mut self) -> Vec<Inference> {
-        self.inference_engine.forward_chain(&mut self.working_memory, &self.rules)
+        self.inference_engine
+            .forward_chain(&mut self.working_memory, &self.rules)
     }
 
     /// Check for contradictions.

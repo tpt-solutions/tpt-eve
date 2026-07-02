@@ -49,7 +49,8 @@ impl ConsistencyChecker {
     }
 
     fn is_exclusive_predicate(&self, predicate: &str) -> bool {
-        matches!(predicate.to_lowercase().as_str(), "is" | "was" | "has" | "are" | "are_not")
+        // "is"/"was" are exclusive (identity); "has" is not (a thing can have multiple attributes)
+        matches!(predicate.to_lowercase().as_str(), "is" | "was")
     }
 }
 
