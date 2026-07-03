@@ -48,7 +48,11 @@ fn all_facts_are_tracked() {
     for f in base_facts() {
         tracker.track(f);
     }
-    assert_eq!(tracker.records().len(), 4, "all four facts should be tracked");
+    assert_eq!(
+        tracker.records().len(),
+        4,
+        "all four facts should be tracked"
+    );
 }
 
 /// Re-tracking the same triple appends to history without creating a duplicate.
@@ -58,7 +62,11 @@ fn re_tracking_same_triple_appends_history() {
     tracker.track(conf_fact("A", "is", "B", 0.5));
     tracker.track(conf_fact("A", "is", "B", 0.8));
     assert_eq!(tracker.records().len(), 1, "must not create duplicate");
-    assert_eq!(tracker.records()[0].history.len(), 2, "history must have two entries");
+    assert_eq!(
+        tracker.records()[0].history.len(),
+        2,
+        "history must have two entries"
+    );
     assert!((tracker.records()[0].current() - 0.8).abs() < 1e-6);
 }
 
@@ -85,10 +93,7 @@ fn uncertain_returns_only_low_confidence_records() {
         1,
         "only TypeScript-has-type_system (0.35) should be below 0.5"
     );
-    assert_eq!(
-        uncertain[0].fact.predicate,
-        Value::Symbol("has".into())
-    );
+    assert_eq!(uncertain[0].fact.predicate, Value::Symbol("has".into()));
 }
 
 /// Trend is positive after a confidence increase.
@@ -110,7 +115,8 @@ fn trend_is_positive_after_increase() {
 fn low_confidence_fact_detected_as_gap() {
     let gaps = KnowledgeGapDetector::new().detect(&base_facts(), 0.5);
     assert!(
-        gaps.iter().any(|g| g.gap_type == GapType::LowConfidenceFact),
+        gaps.iter()
+            .any(|g| g.gap_type == GapType::LowConfidenceFact),
         "TypeScript-has-type_system (conf 0.35) must be flagged; got: {gaps:?}"
     );
 }
@@ -143,8 +149,7 @@ fn missing_attribute_detected_for_category_peer() {
     ];
     let gaps = KnowledgeGapDetector::new().detect(&facts, 0.5);
     let missing = gaps.iter().find(|g| {
-        g.gap_type == GapType::MissingAttribute
-            && g.subject == Value::Symbol("Python".into())
+        g.gap_type == GapType::MissingAttribute && g.subject == Value::Symbol("Python".into())
     });
     assert!(
         missing.is_some(),
@@ -161,8 +166,14 @@ fn no_low_confidence_gaps_for_high_confidence_facts() {
         conf_fact("C", "describes", "A", 0.92),
     ];
     let gaps = KnowledgeGapDetector::new().detect(&facts, 0.5);
-    let lc: Vec<_> = gaps.iter().filter(|g| g.gap_type == GapType::LowConfidenceFact).collect();
-    assert!(lc.is_empty(), "no low-confidence gaps expected; got: {lc:?}");
+    let lc: Vec<_> = gaps
+        .iter()
+        .filter(|g| g.gap_type == GapType::LowConfidenceFact)
+        .collect();
+    assert!(
+        lc.is_empty(),
+        "no low-confidence gaps expected; got: {lc:?}"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -286,7 +297,10 @@ fn full_metacognition_cycle() {
     // Understanding level is deterministic
     let level = engine.assess_understanding();
     assert!(
-        matches!(level, UnderstandingLevel::High | UnderstandingLevel::Medium | UnderstandingLevel::Low),
+        matches!(
+            level,
+            UnderstandingLevel::High | UnderstandingLevel::Medium | UnderstandingLevel::Low
+        ),
         "level must be one of the three variants"
     );
 
@@ -323,9 +337,15 @@ fn monitor_clarification_questions_are_nonempty() {
     let mut engine = MetaCognitionEngine::new();
     engine.add_fact(conf_fact("A", "is", "B", 0.2));
     let qs = engine.request_clarifications(5);
-    assert!(!qs.is_empty(), "should produce at least one clarification question");
+    assert!(
+        !qs.is_empty(),
+        "should produce at least one clarification question"
+    );
     for q in &qs {
-        assert!(!q.question.is_empty(), "clarification question must not be empty");
+        assert!(
+            !q.question.is_empty(),
+            "clarification question must not be empty"
+        );
     }
 }
 

@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 use std::collections::{HashMap, HashSet};
 
 use eve_core::{Fact, Value};
@@ -146,8 +146,14 @@ impl KnowledgeGapDetector {
         seen: &mut HashSet<String>,
         out: &mut Vec<KnowledgeGap>,
     ) {
-        let subjects: HashSet<String> = facts.iter().map(|f| f.subject.as_str().to_string()).collect();
-        let objects: HashSet<String> = facts.iter().map(|f| f.object.as_str().to_string()).collect();
+        let subjects: HashSet<String> = facts
+            .iter()
+            .map(|f| f.subject.as_str().to_string())
+            .collect();
+        let objects: HashSet<String> = facts
+            .iter()
+            .map(|f| f.object.as_str().to_string())
+            .collect();
 
         for obj_str in objects.difference(&subjects) {
             let key = format!("ue:{obj_str}");
@@ -196,7 +202,8 @@ mod tests {
         let facts = vec![low_conf_fact("A", "is", "B", 0.3)];
         let gaps = KnowledgeGapDetector::new().detect(&facts, 0.5);
         assert!(
-            gaps.iter().any(|g| g.gap_type == GapType::LowConfidenceFact),
+            gaps.iter()
+                .any(|g| g.gap_type == GapType::LowConfidenceFact),
             "should detect low-confidence fact"
         );
     }
@@ -210,9 +217,9 @@ mod tests {
             fact("TypeScript", "has", "syntax"),
         ];
         let gaps = KnowledgeGapDetector::new().detect(&facts, 0.5);
-        let missing = gaps
-            .iter()
-            .find(|g| g.gap_type == GapType::MissingAttribute && g.subject == Value::Symbol("Python".into()));
+        let missing = gaps.iter().find(|g| {
+            g.gap_type == GapType::MissingAttribute && g.subject == Value::Symbol("Python".into())
+        });
         assert!(
             missing.is_some(),
             "should detect Python missing 'has' attribute; got: {gaps:?}"
@@ -225,8 +232,8 @@ mod tests {
         let facts = vec![fact("TypeScript", "has", "syntax")];
         let gaps = KnowledgeGapDetector::new().detect(&facts, 0.5);
         assert!(
-            gaps.iter()
-                .any(|g| g.gap_type == GapType::UnexplainedEntity && g.subject == Value::Symbol("syntax".into())),
+            gaps.iter().any(|g| g.gap_type == GapType::UnexplainedEntity
+                && g.subject == Value::Symbol("syntax".into())),
             "should flag 'syntax' as unexplained; got: {gaps:?}"
         );
     }
@@ -240,7 +247,10 @@ mod tests {
             fact("syntax", "describes", "structure"),
         ];
         let gaps = KnowledgeGapDetector::new().detect(&facts, 0.1);
-        let low_conf: Vec<_> = gaps.iter().filter(|g| g.gap_type == GapType::LowConfidenceFact).collect();
+        let low_conf: Vec<_> = gaps
+            .iter()
+            .filter(|g| g.gap_type == GapType::LowConfidenceFact)
+            .collect();
         assert!(low_conf.is_empty(), "no low-confidence gaps expected");
     }
 
@@ -248,7 +258,10 @@ mod tests {
     fn priority_of_low_confidence_gap_equals_one_minus_confidence() {
         let facts = vec![low_conf_fact("A", "is", "B", 0.2)];
         let gaps = KnowledgeGapDetector::new().detect(&facts, 0.5);
-        let lc = gaps.iter().find(|g| g.gap_type == GapType::LowConfidenceFact).unwrap();
+        let lc = gaps
+            .iter()
+            .find(|g| g.gap_type == GapType::LowConfidenceFact)
+            .unwrap();
         assert!(
             (lc.priority - 0.8).abs() < 1e-5,
             "priority should be 1.0 - 0.2 = 0.8; got {}",

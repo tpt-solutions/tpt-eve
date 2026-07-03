@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 use eve_core::{Fact, Value};
 use serde::{Deserialize, Serialize};
 
@@ -75,7 +75,10 @@ impl ConfidenceTracker {
 
     /// Records whose current confidence is below `threshold`.
     pub fn uncertain(&self, threshold: f32) -> Vec<&ConfidenceRecord> {
-        self.records.iter().filter(|r| r.current() < threshold).collect()
+        self.records
+            .iter()
+            .filter(|r| r.current() < threshold)
+            .collect()
     }
 
     /// Mean Expected Calibration Error (ECE) proxy: average absolute deviation
@@ -85,11 +88,18 @@ impl ConfidenceTracker {
     /// Returns 0.0 when no multi-point history exists (perfectly calibrated by
     /// default when there's nothing to measure).
     pub fn calibration_error(&self) -> f32 {
-        let multi: Vec<_> = self.records.iter().filter(|r| r.history.len() >= 2).collect();
+        let multi: Vec<_> = self
+            .records
+            .iter()
+            .filter(|r| r.history.len() >= 2)
+            .collect();
         if multi.is_empty() {
             return 0.0;
         }
-        let total: f32 = multi.iter().map(|r| (r.history[0] - r.current()).abs()).sum();
+        let total: f32 = multi
+            .iter()
+            .map(|r| (r.history[0] - r.current()).abs())
+            .sum();
         total / multi.len() as f32
     }
 

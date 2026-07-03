@@ -1,10 +1,10 @@
-﻿// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 use eve_core::Fact;
 
 use crate::{
     confidence::{ConfidenceRecord, ConfidenceTracker},
     knowledge_gap::{KnowledgeGap, KnowledgeGapDetector},
-    learning_priority::{LearningPriority, LearningPrioritizer},
+    learning_priority::{LearningPrioritizer, LearningPriority},
     monitoring::{ClarificationRequest, UnderstandingLevel, UnderstandingMonitor},
 };
 
@@ -205,6 +205,9 @@ mod tests {
         let before = engine.calibration_error();
         engine.update_confidence(&f, 0.99);
         let after = engine.calibration_error();
-        assert!(after > before, "calibration error should increase after update: {before} → {after}");
+        assert!(
+            after > before,
+            "calibration error should increase after update: {before} → {after}"
+        );
     }
 }

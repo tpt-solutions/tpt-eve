@@ -25,6 +25,8 @@ clap                = { version = "4", features = ["derive"] }
 redb                = "2"
 chrono              = { version = "0.4", features = ["serde"] }
 reqwest             = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+indicatif           = "0.17"
+axum                = { version = "0.8", features = ["json"] }
 dirs                = "5"
 tempfile            = "3"
 

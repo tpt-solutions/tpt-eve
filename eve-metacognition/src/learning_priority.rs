@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 use serde::{Deserialize, Serialize};
 
 use crate::knowledge_gap::KnowledgeGap;
@@ -34,9 +34,11 @@ impl LearningPrioritizer {
         sorted.sort_by(|a, b| {
             let tier_a = Self::tier(a);
             let tier_b = Self::tier(b);
-            tier_a
-                .cmp(&tier_b)
-                .then_with(|| b.priority.partial_cmp(&a.priority).unwrap_or(std::cmp::Ordering::Equal))
+            tier_a.cmp(&tier_b).then_with(|| {
+                b.priority
+                    .partial_cmp(&a.priority)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
         });
 
         sorted
@@ -66,9 +68,15 @@ impl LearningPrioritizer {
     fn rationale(gap: &KnowledgeGap, rank: usize) -> String {
         use crate::knowledge_gap::GapType;
         let base = match gap.gap_type {
-            GapType::LowConfidenceFact => "Clarifying a low-confidence fact yields the fastest confidence gain",
-            GapType::MissingAttribute => "Filling a missing attribute completes a known entity's profile",
-            GapType::IncompletePeerCoverage => "Completing peer coverage reduces inconsistency across similar entities",
+            GapType::LowConfidenceFact => {
+                "Clarifying a low-confidence fact yields the fastest confidence gain"
+            }
+            GapType::MissingAttribute => {
+                "Filling a missing attribute completes a known entity's profile"
+            }
+            GapType::IncompletePeerCoverage => {
+                "Completing peer coverage reduces inconsistency across similar entities"
+            }
             GapType::UnexplainedEntity => "Explaining an opaque entity opens new reasoning paths",
         };
         format!("Rank {rank}: {base} (gap priority {:.2})", gap.priority)

@@ -84,9 +84,9 @@ can answer "what is" questions.
 - [x] `cargo test --workspace` green
 - [x] `cargo clippy --workspace -- -D warnings` green
 - [x] `cargo fmt --all -- --check` green
-- [ ] Manual run: `eve demo --backend spark` against a real loaded tpt-spark model
+- [ ] Manual run: `eve demo --backend spark` — gated on tpt-spark being loaded with a model
 - [ ] Manual spot-check: `eve demo --backend ollama` and `eve demo --backend openrouter`
-- [ ] Commit
+- [x] Commit (Phases 1–5 committed)
 
 ## Phase 2 — Causal Reasoning (Months 4-6) ✓ COMPLETE
 
@@ -144,7 +144,7 @@ insights.
 - [x] Success-criteria tests: generate testable hypotheses, run experiments, discover insights
       (`eve-tests/tests/active_learning_phase4_acceptance.rs`, 13 tests green)
 
-## Phase 5 — Meta-Cognition (Months 13-15) ✓ COMPLETE
+## Phase 5 — Meta-Cognition (Months 13-15) ✓ COMPLETE (committed 2026-07-03)
 
 Goal: confidence tracking, knowledge gap detection, strategic learning decisions.
 Success criteria: can track confidence in beliefs, identify what it doesn't know, prioritize
@@ -164,3 +164,36 @@ learning.
 - [x] Success-criteria tests: confidence tracking accuracy, knowledge-gap identification, learning
       prioritization, confidence calibration
       (`eve-tests/tests/metacognition_phase5_acceptance.rs`, 20 tests green)
+
+## Phase 6 — CLI Hardening & Innovation (in progress)
+
+Goal: Improve robustness, usability, and adoption surface. No new cognitive capability.
+
+### 6.1 Bug fixes (complete 2026-07-03)
+- [x] Fix NaN panic in Gaussian elimination (`eve-causal/src/scm.rs`)
+- [x] Add HTTP status check before JSON parsing in cloud + Ollama backends
+- [x] Warn on missing API key in `CloudNeuralLayer::from_env`
+- [x] Change `term_to_value` in `eve-symbolic/src/lowering.rs` from `panic!` to `Result`
+- [x] Add 30 s read timeout to tpt-spark JSON-RPC socket
+- [x] Emit `tracing::warn!` when `CausalGraphBuilder` silently drops a cycle-creating edge
+- [x] Replace O(n²) `Vec::remove(0)` with `VecDeque::pop_front` in `topo_sort`
+
+### 6.2 License & docs (complete 2026-07-03)
+- [x] Add `// SPDX-License-Identifier: Apache-2.0` to all `src/**/*.rs` files
+- [x] Update README to cover all five phases and full CLI reference
+- [x] Embed demo fixture via `include_str!` so `eve demo` works from any CWD
+- [x] Add `EveError::ActiveLearning` and `EveError::MetaCognition` variants
+
+### 6.3 CLI usability (complete 2026-07-03)
+- [x] `eve extract --save <file>` / `eve ask --load <file>` — session persistence via redb
+- [x] Add `--backend` flag to `eve abstract` (for embedding-backed similarity)
+- [x] Add `--format text|json` output flag on `eve extract`
+- [x] Add `--model <id>` flag for cloud backends
+- [x] Progress indicator (stderr spinner) for long LLM calls (`indicatif` spinner on all neural calls)
+- [x] Retry with backoff on transient network failures (3 attempts, 1 s / 2 s delays on Transport errors)
+
+### 6.4 Innovation (complete 2026-07-03)
+- [x] `eve repl` — interactive REPL (stdin loop, no rustyline dep)
+- [x] `eve serve` — HTTP REST API (axum 0.8): `POST /extract`, `POST /ask`, `GET /facts`
+- [x] `eve explain "<question>"` — show inference provenance chain
+- [x] `eve whatif --graph > graph.dot` — causal graph DOT export
