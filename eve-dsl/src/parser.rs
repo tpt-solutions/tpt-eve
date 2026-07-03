@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use crate::ast::{Program, QueryDef, RuleDef, Statement, Term, Triple};
 use crate::error::ParseError;
 use crate::lexer::{Lexer, Token};

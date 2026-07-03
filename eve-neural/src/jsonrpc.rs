@@ -1,6 +1,8 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use eve_core::EveError;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+use tokio::time::Duration;
 
 /// JSON-RPC 2.0 request envelope.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -92,9 +94,9 @@ impl JsonRpcClient {
             .map_err(|e| EveError::Transport(e.to_string()))?;
 
         let mut line = String::new();
-        self.reader
-            .read_line(&mut line)
+        tokio::time::timeout(Duration::from_secs(30), self.reader.read_line(&mut line))
             .await
+            .map_err(|_| EveError::Transport("tpt-spark did not respond within 30s".into()))?
             .map_err(|e| EveError::Transport(e.to_string()))?;
 
         let response: JsonRpcResponse = serde_json::from_str(line.trim())

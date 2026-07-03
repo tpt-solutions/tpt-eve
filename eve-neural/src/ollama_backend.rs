@@ -1,4 +1,5 @@
-use crate::{prompts, Embedding, NeuralPatternLayer};
+﻿// SPDX-License-Identifier: Apache-2.0
+use crate::{prompts, Embedding, NeuralPatternLayer, SimilarityResult};
 use async_trait::async_trait;
 use eve_core::{EveError, Fact, FactSource, Value};
 use serde::{Deserialize, Serialize};
@@ -83,6 +84,8 @@ impl OllamaNeuralLayer {
             .json(&req)
             .send()
             .await
+            .map_err(|e| EveError::Transport(e.to_string()))?
+            .error_for_status()
             .map_err(|e| EveError::Transport(e.to_string()))?;
 
         let body: GenerateResponse = resp
@@ -128,6 +131,26 @@ impl NeuralPatternLayer for OllamaNeuralLayer {
         Self::parse_facts(&response)
     }
 
+    async fn find_similar(
+        &self,
+        query: &str,
+        candidates: Vec<String>,
+    ) -> Result<Vec<SimilarityResult>, EveError> {
+        let query_emb = self.embed(query).await?;
+        let mut results = Vec::with_capacity(candidates.len());
+        for candidate in candidates {
+            let cand_emb = self.embed(&candidate).await?;
+            let score = cosine_similarity(&query_emb.0, &cand_emb.0);
+            results.push(SimilarityResult { candidate, score });
+        }
+        results.sort_by(|a, b| {
+            b.score
+                .partial_cmp(&a.score)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+        Ok(results)
+    }
+
     async fn embed(&self, text: &str) -> Result<Embedding, EveError> {
         let url = format!("{}/api/embeddings", self.host);
         let req = EmbedRequest {
@@ -140,6 +163,8 @@ impl NeuralPatternLayer for OllamaNeuralLayer {
             .json(&req)
             .send()
             .await
+            .map_err(|e| EveError::Transport(e.to_string()))?
+            .error_for_status()
             .map_err(|e| EveError::Transport(e.to_string()))?;
 
         let body: EmbedResponse = resp
@@ -149,4 +174,14 @@ impl NeuralPatternLayer for OllamaNeuralLayer {
 
         Ok(Embedding(body.embedding))
     }
+}
+
+fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
+    let dot: f32 = a.iter().zip(b).map(|(x, y)| x * y).sum();
+    let norm_a: f32 = a.iter().map(|x| x * x).sum::<f32>().sqrt();
+    let norm_b: f32 = b.iter().map(|x| x * x).sum::<f32>().sqrt();
+    if norm_a == 0.0 || norm_b == 0.0 {
+        return 0.0;
+    }
+    dot / (norm_a * norm_b)
 }

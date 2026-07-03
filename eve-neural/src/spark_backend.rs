@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use crate::{jsonrpc::JsonRpcClient, prompts, NeuralPatternLayer};
 use async_trait::async_trait;
 use eve_core::{EveError, Fact, FactSource, Value};

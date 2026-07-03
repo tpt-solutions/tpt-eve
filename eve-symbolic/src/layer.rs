@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use crate::inference::{Inference, InferenceEngine};
 use crate::qa::question_to_pattern;
 use crate::rule::Rule;

@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use serde::{Deserialize, Serialize};
 
 /// A causal relationship as extracted from text by the Neural Pattern Layer,

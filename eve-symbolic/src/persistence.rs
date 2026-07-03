@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use crate::working_memory::WorkingMemory;
 use eve_core::Fact;
 use redb::{Database, ReadableTable, TableDefinition};

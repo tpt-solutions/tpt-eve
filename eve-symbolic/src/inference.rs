@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use crate::rule::Rule;
 use eve_core::Fact;
 use serde::{Deserialize, Serialize};

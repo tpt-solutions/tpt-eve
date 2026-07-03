@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["eve-core", "eve-dsl", "eve-symbolic", "eve-neural", "eve-causal", "eve-cli", "eve-tests"]
+members = ["eve-core", "eve-dsl", "eve-symbolic", "eve-neural", "eve-causal", "eve-abstraction", "eve-active-learning", "eve-metacognition", "eve-cli", "eve-tests"]
 
 [workspace.package]
 version      = "0.1.0"
@@ -33,4 +33,7 @@ eve-core     = { path = "eve-core" }
 eve-dsl      = { path = "eve-dsl" }
 eve-symbolic = { path = "eve-symbolic" }
 eve-neural   = { path = "eve-neural" }
-eve-causal   = { path = "eve-causal" }
+eve-causal       = { path = "eve-causal" }
+eve-abstraction       = { path = "eve-abstraction" }
+eve-active-learning   = { path = "eve-active-learning" }
+eve-metacognition     = { path = "eve-metacognition" }

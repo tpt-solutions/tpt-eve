@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use eve_core::EveError;
 
 /// Stub for Phase 1 backtracking support. Real implementation

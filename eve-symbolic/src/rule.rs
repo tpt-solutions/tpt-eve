@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use eve_core::{Fact, PatternTerm, Value};
 use serde::{Deserialize, Serialize};
 

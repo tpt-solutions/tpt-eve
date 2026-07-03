@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 mod cloud_backend;
 mod jsonrpc;
 mod mock_backend;

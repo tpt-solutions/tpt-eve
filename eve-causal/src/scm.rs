@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+﻿// SPDX-License-Identifier: Apache-2.0
+use std::collections::{HashMap, VecDeque};
 
 use serde::{Deserialize, Serialize};
 
@@ -150,7 +151,12 @@ fn gaussian_elimination(a: &mut [Vec<f64>], b: &mut [f64]) -> Vec<f64> {
     for col in 0..n {
         // Partial pivot: find row with largest absolute value in this column
         let pivot = (col..n)
-            .max_by(|&i, &j| a[i][col].abs().partial_cmp(&a[j][col].abs()).unwrap())
+            .max_by(|&i, &j| {
+                a[i][col]
+                    .abs()
+                    .partial_cmp(&a[j][col].abs())
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
             .unwrap();
         a.swap(col, pivot);
         b.swap(col, pivot);
@@ -199,15 +205,19 @@ pub(crate) fn topo_sort(graph: &CausalGraph) -> Vec<String> {
     for edge in &graph.edges {
         *in_degree.entry(edge.to.as_str()).or_insert(0) += 1;
     }
-    let mut queue: Vec<&str> = in_degree
+    let mut queue: VecDeque<&str> = in_degree
         .iter()
         .filter(|(_, &d)| d == 0)
         .map(|(&n, _)| n)
+        .collect::<Vec<_>>()
+        .into_iter()
         .collect();
-    queue.sort();
+    // Sort initial queue for deterministic output.
+    let mut sorted_initial: Vec<&str> = queue.drain(..).collect();
+    sorted_initial.sort();
+    queue.extend(sorted_initial);
     let mut order = Vec::new();
-    while !queue.is_empty() {
-        let node = queue.remove(0);
+    while let Some(node) = queue.pop_front() {
         order.push(node.to_string());
         let mut children: Vec<&str> = graph
             .children_of(node)
@@ -219,8 +229,7 @@ pub(crate) fn topo_sort(graph: &CausalGraph) -> Vec<String> {
             let deg = in_degree.entry(child).or_insert(0);
             *deg -= 1;
             if *deg == 0 {
-                queue.push(child);
-                queue.sort();
+                queue.push_back(child);
             }
         }
     }

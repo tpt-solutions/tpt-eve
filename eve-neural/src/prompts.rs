@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 /// Format a fact extraction prompt with the given text.
 pub fn format_fact_prompt(text: &str) -> String {
     format!(

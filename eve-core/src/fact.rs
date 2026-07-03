@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use serde::{Deserialize, Serialize};
 
 /// A single term in a fact triple. `Symbol` is an identifier-like token

@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 /// One slot of a [`Triple`]: a bare identifier, a quoted text literal, or a
 /// rule/query variable (uppercase-leading identifier).
 #[derive(Debug, Clone, PartialEq, Eq)]

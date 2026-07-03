@@ -108,41 +108,59 @@ Success criteria: can build causal graphs from data, predict effects of interven
 - [x] Success-criteria tests: build causal graph from data, predict intervention effects, answer
       "what if" questions (`eve-tests/tests/causal_phase2_acceptance.rs`, 7 tests green)
 
-## Phase 3 — Abstraction (Months 7-9, future)
+## Phase 3 — Abstraction (Months 7-9) ✓ COMPLETE
 
 Goal: cross-domain pattern extraction, analogical reasoning, principle generalization.
 Success criteria: can extract abstract principles from examples, find analogies between domains,
 transfer knowledge to new contexts.
 
-- [ ] New crate `eve-abstraction`: pattern mining across multiple examples/domains
-- [ ] Analogical mapping between domains
-- [ ] Principle generalization
+- [x] New crate `eve-abstraction`: pattern mining across multiple examples/domains
+      (`PatternMiner`, `AbstractPrinciple`, length-2 predicate-chain mining with min_support)
+- [x] Analogical mapping between domains (`AnalogyMapper`, Jaccard-signature greedy bijection)
+- [x] Principle generalization (`AbstractionEngine` facade wiring all three capabilities)
 - [ ] Add `spark_embed` to tpt-spark (preferred over a Python sentence-transformers fallback);
-      Ollama/OpenAI/OpenRouter `embed()` already work as a stopgap
-- [ ] Real `NeuralPatternLayer::embed` / `findSimilar` implementation + tests
-- [ ] Success-criteria tests: extract abstract principles, find cross-domain analogies, transfer
-      knowledge
+      Ollama/OpenAI/OpenRouter `embed()` already work as a stopgap — deferred (external repo)
+- [x] Real `NeuralPatternLayer::embed` / `find_similar` implementation + tests
+      (`OllamaNeuralLayer::find_similar` via embed + cosine similarity; `MockNeuralLayer`
+      deterministic fixture; `eve-cli abstract` demo subcommand)
+- [x] Success-criteria tests: extract abstract principles, find cross-domain analogies, transfer
+      knowledge (`eve-tests/tests/abstraction_phase3_acceptance.rs`, 13 tests green)
 
-## Phase 4 — Active Learning (Months 10-12, future)
+## Phase 4 — Active Learning (Months 10-12) ✓ COMPLETE
 
 Goal: hypothesis generation, experiment design and execution, model updating.
 Success criteria: can generate testable hypotheses, design and run experiments, discover new
 insights.
 
-- [ ] New crate `eve-active-learning`: hypothesis generation via `NeuralPatternLayer`
-- [ ] Experiment design + execution environment (sandboxed code/benchmark runner)
-- [ ] Bayesian belief updating
-- [ ] Success-criteria tests: generate testable hypotheses, run experiments, discover insights
+- [x] New crate `eve-active-learning`: hypothesis generation (`HypothesisGenerator` — chain
+      completion + category generalisation strategies)
+- [x] Experiment design + execution environment (`ExperimentDesign`, `ExperimentRunner` —
+      sandboxed logical test environment; confirms/refutes/inconclusive classification)
+- [x] Bayesian belief updating (`BeliefState`, `BeliefUpdater` — Naive-Bayes posterior with
+      configurable likelihood parameters; `update_sequence` for multi-round evidence)
+- [x] `ActiveLearningEngine` facade: `generate_hypotheses`, `design_experiment`,
+      `run_experiment`, `update_belief`, `discover_insights`
+- [x] `eve learn` CLI subcommand demonstrating full cycle end-to-end
+- [x] Success-criteria tests: generate testable hypotheses, run experiments, discover insights
+      (`eve-tests/tests/active_learning_phase4_acceptance.rs`, 13 tests green)
 
-## Phase 5 — Meta-Cognition (Months 13-15, future)
+## Phase 5 — Meta-Cognition (Months 13-15) ✓ COMPLETE
 
 Goal: confidence tracking, knowledge gap detection, strategic learning decisions.
 Success criteria: can track confidence in beliefs, identify what it doesn't know, prioritize
 learning.
 
-- [ ] New crate `eve-metacognition`: confidence tracking across `Fact`/`Inference`/belief types
-- [ ] Knowledge gap detection
-- [ ] Strategic learning-priority decisions
-- [ ] Understanding-level monitoring / clarification requests
-- [ ] Success-criteria tests: confidence tracking accuracy, knowledge-gap identification, learning
+- [x] New crate `eve-metacognition`: confidence tracking across `Fact`/`Inference`/belief types
+      (`ConfidenceTracker`, `ConfidenceRecord` — per-triple history, trend, calibration error)
+- [x] Knowledge gap detection (`KnowledgeGapDetector` — low-confidence facts, missing attributes
+      in category peers, unexplained entities; priority scoring)
+- [x] Strategic learning-priority decisions (`LearningPrioritizer` — tier-ranked agenda:
+      LowConfidence → MissingAttribute → IncompletePeerCoverage → UnexplainedEntity)
+- [x] Understanding-level monitoring / clarification requests (`UnderstandingMonitor` —
+      High/Medium/Low classification; `ClarificationRequest` generation keyed by gap type)
+- [x] `MetaCognitionEngine` facade: `add_fact`, `update_confidence`, `detect_gaps`,
+      `prioritize_learning`, `assess_understanding`, `request_clarifications`, `calibration_error`
+- [x] `eve reflect` CLI subcommand demonstrating full cycle end-to-end
+- [x] Success-criteria tests: confidence tracking accuracy, knowledge-gap identification, learning
       prioritization, confidence calibration
+      (`eve-tests/tests/metacognition_phase5_acceptance.rs`, 20 tests green)

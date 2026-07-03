@@ -1,6 +1,10 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use clap::{Parser, Subcommand};
+use eve_abstraction::AbstractionEngine;
+use eve_active_learning::{ActiveLearningEngine, ExperimentDesign};
 use eve_causal::{CausalReasoningEngine, Counterfactual, Intervention, Observation};
 use eve_core::{CausalRelationDraft, CausalRelationKind, Fact, Value};
+use eve_metacognition::MetaCognitionEngine;
 use eve_dsl::{parse, Statement};
 use eve_neural::{
     CloudNeuralLayer, CloudProvider, MockNeuralLayer, NeuralPatternLayer, OllamaNeuralLayer,
@@ -43,6 +47,12 @@ enum Commands {
         #[arg(short, long, default_value = "mock")]
         backend: String,
     },
+    /// Demonstrate Phase 3 abstraction: pattern mining, analogical mapping, knowledge transfer
+    Abstract,
+    /// Demonstrate Phase 4 active learning: hypothesis generation, experiment, belief updating
+    Learn,
+    /// Demonstrate Phase 5 meta-cognition: confidence tracking, gap detection, learning agenda
+    Reflect,
 }
 
 #[tokio::main]
@@ -66,6 +76,15 @@ async fn main() {
         }
         Commands::Whatif { backend } => {
             run_whatif(&backend).await;
+        }
+        Commands::Abstract => {
+            run_abstract();
+        }
+        Commands::Learn => {
+            run_learn();
+        }
+        Commands::Reflect => {
+            run_reflect();
         }
         Commands::Ask { question } => {
             let mut layer = SymbolicReasoningLayer::new();
@@ -217,6 +236,291 @@ async fn run_whatif(backend: &str) {
     }
 }
 
+fn run_abstract() {
+    println!("=== Phase 3: Abstraction Demo ===\n");
+
+    // Three programming-language examples sharing the same relational structure.
+    let lang_facts = |name: &str| -> Vec<Fact> {
+        vec![
+            Fact::asserted(
+                Value::Symbol(name.into()),
+                Value::Symbol("is".into()),
+                Value::Symbol("programming_language".into()),
+            ),
+            Fact::asserted(
+                Value::Symbol("programming_language".into()),
+                Value::Symbol("has".into()),
+                Value::Symbol("syntax".into()),
+            ),
+        ]
+    };
+
+    let mut engine = AbstractionEngine::new();
+    engine.add_example("typescript", lang_facts("TypeScript"));
+    engine.add_example("python", lang_facts("Python"));
+    engine.add_example("rust", lang_facts("Rust"));
+
+    // 1. Mine abstract principles (min_support = 2: must appear in ≥ 2 examples).
+    let principles = engine.mine_principles(2);
+    println!("Abstract principles mined from 3 programming-language examples:");
+    for p in &principles {
+        println!(
+            "  [support={}/{}  conf={:.0}%] {}",
+            p.support,
+            3,
+            p.confidence * 100.0,
+            p.name
+        );
+    }
+    println!();
+
+    // 2. Analogical mapping: mammals → birds.
+    let mammals: Vec<Fact> = vec![
+        Fact::asserted(
+            Value::Symbol("cat".into()),
+            Value::Symbol("is".into()),
+            Value::Symbol("mammal".into()),
+        ),
+        Fact::asserted(
+            Value::Symbol("cat".into()),
+            Value::Symbol("has".into()),
+            Value::Symbol("fur".into()),
+        ),
+        Fact::asserted(
+            Value::Symbol("dog".into()),
+            Value::Symbol("is".into()),
+            Value::Symbol("mammal".into()),
+        ),
+        Fact::asserted(
+            Value::Symbol("dog".into()),
+            Value::Symbol("has".into()),
+            Value::Symbol("fur".into()),
+        ),
+        Fact::asserted(
+            Value::Symbol("mammal".into()),
+            Value::Symbol("is_a".into()),
+            Value::Symbol("animal".into()),
+        ),
+    ];
+    let birds: Vec<Fact> = vec![
+        Fact::asserted(
+            Value::Symbol("eagle".into()),
+            Value::Symbol("is".into()),
+            Value::Symbol("bird".into()),
+        ),
+        Fact::asserted(
+            Value::Symbol("eagle".into()),
+            Value::Symbol("has".into()),
+            Value::Symbol("feathers".into()),
+        ),
+        Fact::asserted(
+            Value::Symbol("hawk".into()),
+            Value::Symbol("is".into()),
+            Value::Symbol("bird".into()),
+        ),
+        Fact::asserted(
+            Value::Symbol("hawk".into()),
+            Value::Symbol("has".into()),
+            Value::Symbol("feathers".into()),
+        ),
+        Fact::asserted(
+            Value::Symbol("bird".into()),
+            Value::Symbol("is_a".into()),
+            Value::Symbol("animal".into()),
+        ),
+    ];
+
+    let analogy = engine.map_analogy("mammals", &mammals, "birds", &birds);
+    println!(
+        "Analogy: {} → {}  (score {:.2})",
+        analogy.source_domain, analogy.target_domain, analogy.score
+    );
+    let mut pairs: Vec<(&String, &String)> = analogy.mapping.iter().collect();
+    pairs.sort_by_key(|(k, _)| k.as_str());
+    for (src, tgt) in pairs {
+        println!("  {src} → {tgt}");
+    }
+    println!();
+
+    // 3. Transfer knowledge: new mammal fact → bird domain.
+    let new_mammal_fact = vec![Fact::asserted(
+        Value::Symbol("cat".into()),
+        Value::Symbol("lives_in".into()),
+        Value::Symbol("forest".into()),
+    )];
+    let transferred = engine.transfer(&analogy, &new_mammal_fact);
+    println!("Knowledge transfer (cat lives_in forest → bird domain):");
+    for f in &transferred {
+        println!(
+            "  {} {} {}  (confidence {:.2})",
+            f.subject, f.predicate, f.object, f.confidence
+        );
+    }
+}
+
+fn run_learn() {
+    println!("=== Phase 4: Active Learning Demo ===\n");
+
+    // Seed the engine with a handful of programming-language facts.
+    let mut engine = ActiveLearningEngine::new();
+    let lang_facts = [
+        ("TypeScript", "is", "programming_language"),
+        ("Python", "is", "programming_language"),
+        ("programming_language", "has", "syntax"),
+        ("TypeScript", "has", "type_system"),
+    ];
+    for (s, p, o) in lang_facts {
+        engine.add_fact(Fact::asserted(
+            Value::Symbol(s.into()),
+            Value::Symbol(p.into()),
+            Value::Symbol(o.into()),
+        ));
+    }
+
+    // 1. Generate hypotheses.
+    let hypotheses = engine.generate_hypotheses();
+    println!(
+        "Hypotheses generated from known facts ({} total):",
+        hypotheses.len()
+    );
+    for h in &hypotheses {
+        println!("  [{:.0}% conf] {}", h.confidence * 100.0, h.description);
+    }
+    println!();
+
+    // 2. Pick the first hypothesis, design and run an experiment that confirms it.
+    if let Some(hyp) = hypotheses.first() {
+        println!("Testing hypothesis: \"{}\"", hyp.description);
+        println!(
+            "  Prediction: {} {} {}",
+            hyp.prediction.subject, hyp.prediction.predicate, hyp.prediction.object
+        );
+
+        // Supply an observation that matches the prediction (simulates a real experiment).
+        let mut design = engine.design_experiment(hyp);
+        // Replace the default observation with the actual predicted fact (confirmed).
+        design = ExperimentDesign::new(
+            design.name.clone(),
+            design.hypothesis.clone(),
+            vec![hyp.prediction.clone()],
+        );
+        let result = engine.run_experiment(design);
+
+        let mut hyp_mut = hyp.clone();
+        engine.update_belief(&mut hyp_mut, &result);
+        println!(
+            "  Experiment: {} (confidence {:.0}% → {:.0}%)\n",
+            if result.confirmed {
+                "CONFIRMED"
+            } else {
+                "REFUTED/INCONCLUSIVE"
+            },
+            hyp.confidence * 100.0,
+            hyp_mut.confidence * 100.0,
+        );
+    }
+
+    // 3. Discover insights at a low threshold to surface chain-completion results.
+    let insights = engine.discover_insights(0.5);
+    println!("Insights discovered (confidence ≥ 50%):");
+    if insights.is_empty() {
+        println!("  (none)");
+    } else {
+        for f in &insights {
+            println!(
+                "  {} {} {}  (confidence {:.0}%)",
+                f.subject,
+                f.predicate,
+                f.object,
+                f.confidence * 100.0
+            );
+        }
+    }
+}
+
+fn run_reflect() {
+    println!("=== Phase 5: Meta-Cognition Demo ===\n");
+
+    let mut engine = MetaCognitionEngine::new();
+
+    // Seed with programming-language facts at varying confidence levels.
+    let high = |s: &str, p: &str, o: &str| -> Fact {
+        let mut f = Fact::asserted(
+            Value::Symbol(s.into()),
+            Value::Symbol(p.into()),
+            Value::Symbol(o.into()),
+        );
+        f.confidence = 0.95;
+        f
+    };
+    let low = |s: &str, p: &str, o: &str, conf: f32| -> Fact {
+        let mut f = Fact::asserted(
+            Value::Symbol(s.into()),
+            Value::Symbol(p.into()),
+            Value::Symbol(o.into()),
+        );
+        f.confidence = conf;
+        f
+    };
+
+    engine.add_fact(high("TypeScript", "is", "programming_language"));
+    engine.add_fact(high("Python", "is", "programming_language"));
+    engine.add_fact(high("programming_language", "has", "syntax"));
+    engine.add_fact(low("TypeScript", "has", "type_system", 0.4)); // uncertain
+    engine.add_fact(low("Python", "supports", "dynamic_typing", 0.35)); // uncertain
+
+    // 1. Confidence tracking
+    println!("Tracked facts ({} total):", engine.records().len());
+    for rec in engine.records() {
+        println!(
+            "  [{:.0}% conf] {} {} {}",
+            rec.current() * 100.0,
+            rec.fact.subject,
+            rec.fact.predicate,
+            rec.fact.object
+        );
+    }
+    println!(
+        "\nCalibration error (initial vs. updated): {:.3}\n",
+        engine.calibration_error()
+    );
+
+    // Update one fact's confidence to simulate new evidence arriving.
+    let ts_type = low("TypeScript", "has", "type_system", 0.4);
+    engine.update_confidence(&ts_type, 0.85);
+    println!(
+        "After new evidence for TypeScript-has-type_system: calibration error = {:.3}\n",
+        engine.calibration_error()
+    );
+
+    // 2. Knowledge gap detection
+    let gaps = engine.detect_gaps(0.6);
+    println!("Knowledge gaps detected ({} total):", gaps.len());
+    for g in &gaps {
+        println!("  [{:?}  priority={:.2}] {}", g.gap_type, g.priority, g.description);
+    }
+    println!();
+
+    // 3. Learning agenda
+    let agenda = engine.prioritize_learning(&gaps);
+    println!("Learning agenda (ranked):");
+    for item in &agenda {
+        println!("  {}. {}", item.rank, item.rationale);
+    }
+    println!();
+
+    // 4. Understanding level
+    let level = engine.assess_understanding();
+    println!("Overall understanding level: {level}\n");
+
+    // 5. Clarification requests
+    let questions = engine.request_clarifications(3);
+    println!("Top clarification questions:");
+    for q in &questions {
+        println!("  [{:.0}% urgency] {}", q.priority * 100.0, q.question);
+    }
+}
+
 fn build_backend(backend: &str) -> Box<dyn NeuralPatternLayer> {
     match backend {
         "spark" => Box::new(SparkNeuralLayer::new()),
@@ -247,57 +551,25 @@ async fn run_demo(backend: &str) {
         ),
     }
 
-    // Load facts and rules from fixture
-    let fixture_path = std::path::Path::new("fixtures/typescript_example.eve");
-    if fixture_path.exists() {
-        let fixture_content = std::fs::read_to_string(fixture_path).unwrap_or_default();
-        match parse(&fixture_content) {
-            Ok(program) => {
-                for stmt in program.statements {
-                    match stmt {
-                        Statement::Fact(triple) => layer.add_fact(triple_to_fact(&triple)),
-                        Statement::Rule(rule_def) => {
-                            let (conditions, conclusion) = rule_to_runtime(&rule_def);
-                            layer.add_rule(Rule::new(rule_def.name, conditions, conclusion));
-                        }
-                        Statement::Query(_) => {}
+    // Load facts and rules from the embedded fixture (compiled in at build time).
+    const FIXTURE: &str = include_str!("../fixtures/typescript_example.eve");
+    match parse(FIXTURE) {
+        Ok(program) => {
+            for stmt in program.statements {
+                match stmt {
+                    Statement::Fact(triple) => match triple_to_fact(&triple) {
+                        Ok(fact) => layer.add_fact(fact),
+                        Err(e) => eprintln!("Warning: invalid fact in fixture: {e}"),
+                    },
+                    Statement::Rule(rule_def) => {
+                        let (conditions, conclusion) = rule_to_runtime(&rule_def);
+                        layer.add_rule(Rule::new(rule_def.name, conditions, conclusion));
                     }
+                    Statement::Query(_) => {}
                 }
             }
-            Err(e) => eprintln!("Warning: fixture parse error: {}", e),
         }
-    } else {
-        // Fallback: assert the base facts using Text objects to match MockNeuralLayer's output
-        layer.add_fact(Fact::asserted(
-            Value::Symbol("TypeScript".into()),
-            Value::Symbol("is".into()),
-            Value::Text("programming language".into()),
-        ));
-        layer.add_fact(Fact::asserted(
-            Value::Text("programming language".into()),
-            Value::Symbol("has".into()),
-            Value::Symbol("syntax".into()),
-        ));
-        layer.add_rule(Rule::new(
-            Some("transitive_has".into()),
-            vec![
-                (
-                    eve_core::PatternTerm::Variable("X".into()),
-                    eve_core::PatternTerm::Bound(Value::Symbol("is".into())),
-                    eve_core::PatternTerm::Variable("Y".into()),
-                ),
-                (
-                    eve_core::PatternTerm::Variable("Y".into()),
-                    eve_core::PatternTerm::Bound(Value::Symbol("has".into())),
-                    eve_core::PatternTerm::Variable("Z".into()),
-                ),
-            ],
-            (
-                eve_core::PatternTerm::Variable("X".into()),
-                eve_core::PatternTerm::Bound(Value::Symbol("has".into())),
-                eve_core::PatternTerm::Variable("Z".into()),
-            ),
-        ));
+        Err(e) => eprintln!("Warning: fixture parse error: {e}"),
     }
 
     layer.infer();

@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use thiserror::Error;
 
 /// Shared error type for all `eve-*` crates. Kept dependency-free (no
@@ -28,4 +29,13 @@ pub enum EveError {
 
     #[error("causal error: {0}")]
     Causal(String),
+
+    #[error("abstraction error: {0}")]
+    Abstraction(String),
+
+    #[error("active learning error: {0}")]
+    ActiveLearning(String),
+
+    #[error("meta-cognition error: {0}")]
+    MetaCognition(String),
 }

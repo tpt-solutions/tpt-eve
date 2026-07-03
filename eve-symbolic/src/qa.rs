@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use eve_core::{Pattern, PatternTerm, Value};
 
 /// Translate a natural language question into a Pattern query.

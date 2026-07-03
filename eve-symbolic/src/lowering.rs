@@ -1,24 +1,30 @@
-use eve_core::{Fact, Pattern, PatternTerm, Value};
+﻿// SPDX-License-Identifier: Apache-2.0
+use eve_core::{EveError, Fact, Pattern, PatternTerm, Value};
 use eve_dsl::{QueryDef, RuleDef, Term, Triple};
 
 type PatternTriple = (PatternTerm, PatternTerm, PatternTerm);
 
 /// Convert a DSL Term to a core Value.
-pub fn term_to_value(term: &Term) -> Value {
+///
+/// Returns an error if the term is a variable — variables are only valid in rule
+/// conditions and query patterns, not in asserted facts.
+pub fn term_to_value(term: &Term) -> Result<Value, EveError> {
     match term {
-        Term::Ident(s) => Value::Symbol(s.clone()),
-        Term::Literal(s) => Value::Text(s.clone()),
-        Term::Var(_) => panic!("Variables cannot be converted to Value directly"),
+        Term::Ident(s) => Ok(Value::Symbol(s.clone())),
+        Term::Literal(s) => Ok(Value::Text(s.clone())),
+        Term::Var(v) => Err(EveError::Dsl(format!(
+            "variable ?{v} cannot appear in an asserted fact"
+        ))),
     }
 }
 
 /// Convert a DSL Triple to a core Fact (for asserted facts).
-pub fn triple_to_fact(triple: &Triple) -> Fact {
-    Fact::asserted(
-        term_to_value(&triple.subject),
-        term_to_value(&triple.predicate),
-        term_to_value(&triple.object),
-    )
+pub fn triple_to_fact(triple: &Triple) -> Result<Fact, EveError> {
+    Ok(Fact::asserted(
+        term_to_value(&triple.subject)?,
+        term_to_value(&triple.predicate)?,
+        term_to_value(&triple.object)?,
+    ))
 }
 
 /// Convert a DSL Triple to a Pattern for querying.

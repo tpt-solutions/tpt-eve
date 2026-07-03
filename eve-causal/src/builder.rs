@@ -1,4 +1,6 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use eve_core::{CausalRelationDraft, CausalRelationKind};
+use tracing::warn;
 
 use crate::{
     graph::{CausalEdge, CausalGraph},
@@ -45,7 +47,9 @@ impl CausalGraphBuilder {
                 strength,
             };
             // Skip edges that would introduce a cycle rather than panicking.
-            let _ = graph.add_edge(edge);
+            if let Err(e) = graph.add_edge(edge) {
+                warn!("Skipped edge {} -> {}: {e}", draft.cause, draft.effect);
+            }
         }
 
         let scm = if self.observations.is_empty() {

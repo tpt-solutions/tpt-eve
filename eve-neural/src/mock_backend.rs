@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use crate::{Embedding, NeuralPatternLayer, SimilarityResult};
 use async_trait::async_trait;
 use eve_core::{EveError, Fact, FactSource, Value};

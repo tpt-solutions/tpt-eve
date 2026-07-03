@@ -1,3 +1,4 @@
+﻿// SPDX-License-Identifier: Apache-2.0
 use crate::{prompts, CloudProvider, Embedding, NeuralPatternLayer};
 use async_trait::async_trait;
 use eve_core::{EveError, Fact, FactSource, Value};
@@ -135,11 +136,15 @@ impl CloudNeuralLayer {
     }
 
     pub fn from_env(provider: CloudProvider) -> Self {
-        let key = match provider {
-            CloudProvider::Anthropic => std::env::var("ANTHROPIC_API_KEY").unwrap_or_default(),
-            CloudProvider::OpenAi => std::env::var("OPENAI_API_KEY").unwrap_or_default(),
-            CloudProvider::OpenRouter => std::env::var("OPENROUTER_API_KEY").unwrap_or_default(),
+        let var_name = match provider {
+            CloudProvider::Anthropic => "ANTHROPIC_API_KEY",
+            CloudProvider::OpenAi => "OPENAI_API_KEY",
+            CloudProvider::OpenRouter => "OPENROUTER_API_KEY",
         };
+        let key = std::env::var(var_name).unwrap_or_else(|_| {
+            tracing::warn!("{var_name} is not set — cloud API calls will fail with 401");
+            String::new()
+        });
         Self::new(provider, key)
     }
 
@@ -179,6 +184,8 @@ impl CloudNeuralLayer {
             .json(&req)
             .send()
             .await
+            .map_err(|e| EveError::Transport(e.to_string()))?
+            .error_for_status()
             .map_err(|e| EveError::Transport(e.to_string()))?;
 
         let body: AnthropicResponse = resp
@@ -208,6 +215,8 @@ impl CloudNeuralLayer {
             .json(&req)
             .send()
             .await
+            .map_err(|e| EveError::Transport(e.to_string()))?
+            .error_for_status()
             .map_err(|e| EveError::Transport(e.to_string()))?;
 
         let body: OpenAiResponse = resp
