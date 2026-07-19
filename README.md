@@ -1,5 +1,9 @@
 # TPT Eve
 
+[![crates.io](https://img.shields.io/crates/v/tpt-eve-core.svg)](https://crates.io/crates/tpt-eve-core)
+[![docs.rs](https://img.shields.io/docsrs/tpt-eve-core)](https://docs.rs/tpt-eve-core)
+[![license](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
+
 TPT Eve is a cognitive architecture that moves beyond statistical pattern matching to build
 systems capable of genuine understanding, causal reasoning, and discovery. LLMs are excellent at
 recognising patterns in data, but on their own they don't understand *why* things happen, can't
@@ -28,7 +32,7 @@ current build status.
 ```
 
 All five phases are implemented. Each phase builds on the previous and is independently
-accessible via the `eve` CLI.
+accessible via the `tpt-eve` CLI.
 
 ## Quickstart
 
@@ -36,19 +40,19 @@ accessible via the `eve` CLI.
 cargo build --workspace
 
 # Phase 1 — extract facts, apply rules, answer questions (mock LLM, no key needed)
-cargo run -p eve-cli -- demo --backend mock
+cargo run -p tpt-eve-cli -- demo --backend mock
 
 # Phase 2 — causal reasoning: interventions, counterfactuals, effect estimation
-cargo run -p eve-cli -- whatif --backend mock
+cargo run -p tpt-eve-cli -- whatif --backend mock
 
 # Phase 3 — abstraction: pattern mining, analogical mapping, knowledge transfer
-cargo run -p eve-cli -- abstract
+cargo run -p tpt-eve-cli -- abstract
 
 # Phase 4 — active learning: hypothesis generation, experiment, belief updating
-cargo run -p eve-cli -- learn
+cargo run -p tpt-eve-cli -- learn
 
 # Phase 5 — meta-cognition: confidence tracking, gap detection, learning agenda
-cargo run -p eve-cli -- reflect
+cargo run -p tpt-eve-cli -- reflect
 ```
 
 Other backends for `demo`, `extract`, and `whatif`:
@@ -74,21 +78,21 @@ Other backends for `demo`, `extract`, and `whatif`:
 ## CLI Reference
 
 ```
-eve extract <text> [--backend <b>] [--model <id>] [--format text|json] [--save <file>]
+tpt-eve extract <text> [--backend <b>] [--model <id>] [--format text|json] [--save <file>]
                                      Extract facts; optionally save session to redb file
-eve ask "<question>" [--load <file>] Query the symbolic layer (load session or demo KB)
-eve explain "<question>" [--load <file>]
+tpt-eve ask "<question>" [--load <file>] Query the symbolic layer (load session or demo KB)
+tpt-eve explain "<question>" [--load <file>]
                                      Answer with full inference provenance chain
-eve demo [--backend <b>] [--model <id>]
+tpt-eve demo [--backend <b>] [--model <id>]
                                      Phase 1 end-to-end: extract → infer → ask
-eve whatif [--backend <b>] [--model <id>] [--graph]
+tpt-eve whatif [--backend <b>] [--model <id>] [--graph]
                                      Phase 2 causal: intervention + counterfactual
                                      --graph emits DOT digraph on stdout
-eve abstract [--backend <b>]         Phase 3 abstraction demo
-eve learn                            Phase 4 active learning demo
-eve reflect                          Phase 5 meta-cognition demo
-eve repl                             Interactive REPL: type facts/rules/queries line by line
-eve serve [--backend <b>] [--port <n>]
+tpt-eve abstract [--backend <b>]     Phase 3 abstraction demo
+tpt-eve learn                        Phase 4 active learning demo
+tpt-eve reflect                      Phase 5 meta-cognition demo
+tpt-eve repl                         Interactive REPL: type facts/rules/queries line by line
+tpt-eve serve [--backend <b>] [--port <n>]
                                      HTTP REST API on port 3737 (default)
                                      POST /extract  {"text":"..."}  → [facts]
                                      POST /ask      {"question":"..."} → {"answer":...}
@@ -99,19 +103,19 @@ eve serve [--backend <b>] [--port <n>]
 
 | Crate | Phase | Purpose |
 |---|---|---|
-| `eve-core` | — | Shared types: `Fact`, `Pattern`, `Value`, `EveError` |
-| `eve-dsl` | — | Rule/query DSL: lexer, parser, AST |
-| `eve-symbolic` | 1 | Working memory, forward-chaining inference, consistency checking |
-| `eve-neural` | 1 | `NeuralPatternLayer` trait + tpt-spark/Ollama/cloud/mock backends |
-| `eve-causal` | 2 | Causal DAG construction, SCM, intervention calculus, counterfactuals |
-| `eve-abstraction` | 3 | Pattern mining, analogical reasoning, knowledge transfer |
-| `eve-active-learning` | 4 | Hypothesis generation, experiment design, Bayesian belief updating |
-| `eve-metacognition` | 5 | Confidence tracking, knowledge-gap detection, learning prioritisation |
-| `eve-cli` | — | The `eve` binary |
-| `eve-tests` | — | Workspace integration and acceptance tests |
+| `tpt-eve-core` | — | Shared types: `Fact`, `Pattern`, `Value`, `EveError` |
+| `tpt-eve-dsl` | — | Rule/query DSL: lexer, parser, AST |
+| `tpt-eve-symbolic` | 1 | Working memory, forward-chaining inference, consistency checking |
+| `tpt-eve-neural` | 1 | `NeuralPatternLayer` trait + tpt-spark/Ollama/cloud/mock backends |
+| `tpt-eve-causal` | 2 | Causal DAG construction, SCM, intervention calculus, counterfactuals |
+| `tpt-eve-abstraction` | 3 | Pattern mining, analogical reasoning, knowledge transfer |
+| `tpt-eve-active-learning` | 4 | Hypothesis generation, experiment design, Bayesian belief updating |
+| `tpt-eve-metacognition` | 5 | Confidence tracking, knowledge-gap detection, learning prioritisation |
+| `tpt-eve-cli` | — | The `tpt-eve` binary |
+| `tpt-eve-tests` | — | Workspace integration and acceptance tests |
 
 See [CLAUDE.md](CLAUDE.md) for build commands and architectural detail.
 
 ## License
 
-Apache-2.0 — see [LICENSE](LICENSE).
+Dual-licensed under either of [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE) at your option.

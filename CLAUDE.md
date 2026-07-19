@@ -15,10 +15,10 @@ cargo clippy --workspace -- -D warnings
 cargo test --workspace
 
 # Test a single crate
-cargo test -p eve-symbolic
+cargo test -p tpt-eve-symbolic
 
 # Run a single test by name
-cargo test -p eve-symbolic inference::tests::forward_chain_derives_transitive_fact
+cargo test -p tpt-eve-symbolic inference::tests::forward_chain_derives_transitive_fact
 
 # Format
 cargo fmt --all
@@ -27,7 +27,7 @@ cargo fmt --all
 cargo fmt --all -- --check
 
 # Run the CLI demo (no live LLM required — uses the mock backend)
-cargo run -p eve-cli -- demo --backend mock
+cargo run -p tpt-eve-cli -- demo --backend mock
 ```
 
 Rustfmt config (`rustfmt.toml`): max_width 100, 4-space tabs, `imports_granularity = "Module"`, `group_imports = "StdExternalCrate"`.
@@ -36,30 +36,30 @@ Rustfmt config (`rustfmt.toml`): max_width 100, 4-space tabs, `imports_granulari
 
 TPT Eve augments LLM pattern recognition with symbolic reasoning, causal inference, abstraction,
 active learning, and meta-cognition. Phase 1 (Foundation) implements the first two layers as a
-Cargo workspace of sibling crates, leaving room for `eve-causal`, `eve-abstraction`,
-`eve-active-learning`, and `eve-metacognition` to be added later without restructuring.
+Cargo workspace of sibling crates, leaving room for `tpt-eve-causal`, `tpt-eve-abstraction`,
+`tpt-eve-active-learning`, and `tpt-eve-metacognition` to be added later without restructuring.
 
 ```
-eve-core      — Shared types: Value, Fact, Pattern, EveError, CausalRelationDraft (no internal deps)
-eve-dsl       — Rule/query DSL: lexer, parser, AST (depends on eve-core)
-eve-symbolic  — Working memory, forward-chaining inference, consistency checking, QA (depends on eve-core, eve-dsl)
-eve-neural    — NeuralPatternLayer trait + tpt-spark/Ollama/cloud/mock backends (depends on eve-core)
-eve-cli       — `eve` binary: extract / demo / ask subcommands (depends on all of the above)
-eve-tests     — Workspace integration tests, publish = false
+tpt-eve-core      — Shared types: Value, Fact, Pattern, EveError, CausalRelationDraft (no internal deps)
+tpt-eve-dsl       — Rule/query DSL: lexer, parser, AST (depends on tpt-eve-core)
+tpt-eve-symbolic  — Working memory, forward-chaining inference, consistency checking, QA (depends on tpt-eve-core, tpt-eve-dsl)
+tpt-eve-neural    — NeuralPatternLayer trait + tpt-spark/Ollama/cloud/mock backends (depends on tpt-eve-core)
+tpt-eve-cli       — `tpt-eve` binary: extract / demo / ask subcommands (depends on all of the above)
+tpt-eve-tests     — Workspace integration tests, publish = false
 ```
 
-Dependency direction is a strict DAG: `eve-core` → `eve-dsl` → `eve-symbolic`; `eve-core` → `eve-neural`
-(a sibling of `eve-symbolic`, not coupled to it — `eve-neural` produces `Fact`s, `eve-symbolic` consumes
-them, wired together only in `eve-cli`/`eve-tests`).
+Dependency direction is a strict DAG: `tpt-eve-core` → `tpt-eve-dsl` → `tpt-eve-symbolic`; `tpt-eve-core` → `tpt-eve-neural`
+(a sibling of `tpt-eve-symbolic`, not coupled to it — `tpt-eve-neural` produces `Fact`s, `tpt-eve-symbolic` consumes
+them, wired together only in `tpt-eve-cli`/`tpt-eve-tests`).
 
-### `eve-core`
+### `tpt-eve-core`
 
 Shared vocabulary every other crate builds on: `Value` (`Symbol`/`Text`), `Fact` (subject-predicate-object
 triple with `FactSource` provenance and a confidence score), `Pattern` (a triple where any slot may be
 `Bound` or a `Variable`), `EveError` (shared error type), and `CausalRelationDraft` (a Phase 2 type
-defined now so `eve-neural`'s trait surface matches the spec from day one).
+defined now so `tpt-eve-neural`'s trait surface matches the spec from day one).
 
-### `eve-dsl` — the rule/query DSL
+### `tpt-eve-dsl` — the rule/query DSL
 
 A small Datalog-like language for facts, rules, and queries:
 
@@ -78,10 +78,10 @@ rule transitive_has {
 Hand-written recursive-descent lexer (`lexer.rs`) and parser (`parser.rs`) — no parser-combinator
 dependency (pest/nom/chumsky); the grammar is small and stable, and no other tpt-* repo uses one, so
 this keeps the dependency surface flat. `ast.rs` defines the syntactic types (`Term`, `Triple`,
-`RuleDef`, `QueryDef`, `Statement`, `Program`); `eve-dsl` has no notion of working memory or
-inference — that lowering happens in `eve-symbolic`.
+`RuleDef`, `QueryDef`, `Statement`, `Program`); `tpt-eve-dsl` has no notion of working memory or
+inference — that lowering happens in `tpt-eve-symbolic`.
 
-### `eve-symbolic` — working memory and inference
+### `tpt-eve-symbolic` — working memory and inference
 
 - **Working memory is attended via indexed lookup, not a generic graph DB.** `WorkingMemory` holds
   facts in a `Vec` plus by-subject/predicate/object `HashMap` indexes for O(1) candidate narrowing
@@ -96,7 +96,7 @@ inference — that lowering happens in `eve-symbolic`.
   by triple shape (same subject+predicate, differing object, on an "exclusive" predicate like `is`).
   This differs from tpt-anima's `CausalGraph::validate_causal_integrity()`, which detects contradictions
   via an explicitly-asserted `Contradicts` edge type — that approach isn't reusable here since Phase 1
-  has no causal graph yet (Phase 2's `eve-causal` is where tpt-anima's DFS cycle-detection pattern is
+  has no causal graph yet (Phase 2's `tpt-eve-causal` is where tpt-anima's DFS cycle-detection pattern is
   worth revisiting as a template).
 - **Backtracking is a Phase 1 stub.** `backtrack()` matches the spec's `SymbolicReasoningLayer` interface
   but returns `EveError::NotSupported` — real backtracking belongs with Phase 2's intervention/
@@ -106,7 +106,7 @@ inference — that lowering happens in `eve-symbolic`.
   convention and its no-daemon philosophy. Indexes are never persisted, only facts — indexes are
   rebuilt on load.
 
-### `eve-neural` — pluggable LLM integration
+### `tpt-eve-neural` — pluggable LLM integration
 
 `NeuralPatternLayer` is an `async_trait` with `extract_facts`, `extract_causal_relations`, and an
 `embed` method that defaults to `NotSupported`. Backends:
@@ -121,7 +121,7 @@ inference — that lowering happens in `eve-symbolic`.
   OpenAI-compatible gateway, selected via `CloudProvider`. OpenAI and OpenRouter support `embed()`;
   Anthropic does not.
 - **`MockNeuralLayer`** — deterministic fixture backend returning spec.txt's exact worked-example
-  facts. Used by `eve demo --backend mock` (the default) and by `eve-tests` so CI needs neither a live
+  facts. Used by `tpt-eve demo --backend mock` (the default) and by `tpt-eve-tests` so CI needs neither a live
   LLM process nor an API key.
 
 **Embeddings are deliberately not a Phase 1 dependency for the local Spark path.** Phase 1's success
@@ -130,24 +130,24 @@ search. When Phase 3 (Abstraction) needs embeddings more heavily, prefer adding 
 to tpt-spark over standing up a Python sentence-transformers subprocess — it keeps the whole stack in
 the existing Rust/Spark process model. Ollama and OpenAI/OpenRouter are working alternatives until then.
 
-### `eve-cli`
+### `tpt-eve-cli`
 
-`eve extract <text>`, `eve demo`, `eve ask "<question>"`, with `--backend mock|spark|ollama|anthropic|
-openai|openrouter`. `eve demo` is the literal Phase 1 acceptance test: extract facts from spec.txt's
+`tpt-eve extract <text>`, `tpt-eve demo`, `tpt-eve ask "<question>"`, with `--backend mock|spark|ollama|anthropic|
+openai|openrouter`. `tpt-eve demo` is the literal Phase 1 acceptance test: extract facts from spec.txt's
 TypeScript paragraph, load a `.eve` fixture with the transitive-`has` rule, forward-chain, check
 consistency, and answer "What does TypeScript have?" using both asserted and inferred facts.
 
 ## Key Cross-Layer Relationships
 
-- **`eve-neural` → `eve-symbolic`**: `NeuralPatternLayer::extract_facts` produces `eve_core::Fact`s that
+- **`tpt-eve-neural` → `tpt-eve-symbolic`**: `NeuralPatternLayer::extract_facts` produces `tpt_eve_core::Fact`s that
   `WorkingMemory::add_fact` consumes directly — no adapter layer needed since both depend on the same
-  `eve-core` types.
-- **`eve-dsl` → `eve-symbolic`**: `eve-symbolic/src/lowering.rs` converts `eve_dsl::ast` types
-  (`Term`, `RuleDef`, `QueryDef`) into `eve_core`/`eve_symbolic` runtime types (`Value`, `Pattern`,
-  `Rule`) — `eve-dsl` stays purely syntactic and has no knowledge of working memory.
-- **`tpt-spark` is an external integration, not a workspace member.** `eve-neural`'s `spark_backend.rs`
+  `tpt-eve-core` types.
+- **`tpt-eve-dsl` → `tpt-eve-symbolic`**: `tpt-eve-symbolic/src/lowering.rs` converts `tpt_eve_dsl::ast` types
+  (`Term`, `RuleDef`, `QueryDef`) into `tpt_eve_core`/`tpt_eve_symbolic` runtime types (`Value`, `Pattern`,
+  `Rule`) — `tpt-eve-dsl` stays purely syntactic and has no knowledge of working memory.
+- **`tpt-spark` is an external integration, not a workspace member.** `tpt-eve-neural`'s `spark_backend.rs`
   is the only place that speaks tpt-spark's JSON-RPC protocol; see tpt-spark's `HEADLESS_API.md` for
   the wire contract.
 - **`tpt-library` is intentionally not depended upon.** It's currently empty; tpt-eve was deliberately
   not chosen to seed it yet (decided when evaluating reuse of tpt-anima's `CausalGraph`, which turned
-  out not to be a drop-in fit for Phase 1). Revisit when `eve-causal` lands in Phase 2.
+  out not to be a drop-in fit for Phase 1). Revisit when `tpt-eve-causal` lands in Phase 2.

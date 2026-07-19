@@ -1,0 +1,19 @@
+[package]
+name        = "tpt-eve-metacognition"
+description = "TPT Eve — Phase 5 meta-cognition layer: confidence tracking, knowledge-gap detection, strategic learning prioritization"
+version.workspace     = true
+edition.workspace     = true
+license.workspace     = true
+authors.workspace     = true
+repository.workspace  = true
+homepage.workspace     = true
+readme                 = "README.md"
+keywords               = ["metacognition", "confidence", "knowledge-gap", "calibration", "learning-priority"]
+categories             = ["algorithms", "science"]
+rust-version.workspace = true
+
+[dependencies]
+tpt-eve-core = { workspace = true }
+serde     = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }

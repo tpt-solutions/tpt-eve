@@ -1,0 +1,23 @@
+[package]
+name = "tpt-eve-tests"
+description = "TPT Eve — workspace integration and acceptance tests (not published)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+
+[dev-dependencies]
+tpt-eve-core = { workspace = true }
+tpt-eve-dsl = { workspace = true }
+tpt-eve-symbolic = { workspace = true }
+tpt-eve-neural = { workspace = true }
+tpt-eve-causal          = { workspace = true }
+tpt-eve-abstraction     = { workspace = true }
+tpt-eve-active-learning = { workspace = true }
+tpt-eve-metacognition   = { workspace = true }
+tokio = { workspace = true }

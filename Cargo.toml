@@ -1,41 +1,39 @@
 [workspace]
 resolver = "2"
-members = ["eve-core", "eve-dsl", "eve-symbolic", "eve-neural", "eve-causal", "eve-abstraction", "eve-active-learning", "eve-metacognition", "eve-cli", "eve-tests"]
+members = ["tpt-eve-core", "tpt-eve-dsl", "tpt-eve-symbolic", "tpt-eve-neural", "tpt-eve-causal", "tpt-eve-abstraction", "tpt-eve-active-learning", "tpt-eve-metacognition", "tpt-eve-cli", "tpt-eve-tests"]
 
 [workspace.package]
 version      = "0.1.0"
 edition      = "2021"
-license      = "Apache-2.0"
+license      = "MIT OR Apache-2.0"
 authors      = ["TPT Solutions <open-source@tptsolutions.io>"]
 repository   = "https://github.com/tpt-solutions/tpt-eve"
+homepage     = "https://github.com/tpt-solutions/tpt-eve"
+readme       = "README.md"
 rust-version = "1.80"
 
 [workspace.dependencies]
 serde               = { version = "1", features = ["derive"] }
 serde_json          = "1"
-uuid                = { version = "1", features = ["v4", "serde"] }
 thiserror           = "1"
-tokio               = { version = "1", features = ["full"] }
-tokio-util          = { version = "0.7", features = ["codec"] }
-futures-util        = "0.3"
+tokio               = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "net", "io-util"] }
 async-trait         = "0.1"
 tracing             = "0.1"
 tracing-subscriber  = { version = "0.3", features = ["env-filter"] }
 clap                = { version = "4", features = ["derive"] }
 redb                = "2"
-chrono              = { version = "0.4", features = ["serde"] }
 reqwest             = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
 indicatif           = "0.17"
-axum                = { version = "0.8", features = ["json"] }
+axum                = "0.8"
 dirs                = "5"
 tempfile            = "3"
 
 # internal crates
-eve-core     = { path = "eve-core" }
-eve-dsl      = { path = "eve-dsl" }
-eve-symbolic = { path = "eve-symbolic" }
-eve-neural   = { path = "eve-neural" }
-eve-causal       = { path = "eve-causal" }
-eve-abstraction       = { path = "eve-abstraction" }
-eve-active-learning   = { path = "eve-active-learning" }
-eve-metacognition     = { path = "eve-metacognition" }
+tpt-eve-core           = { path = "tpt-eve-core", version = "0.1.0" }
+tpt-eve-dsl            = { path = "tpt-eve-dsl", version = "0.1.0" }
+tpt-eve-symbolic       = { path = "tpt-eve-symbolic", version = "0.1.0" }
+tpt-eve-neural         = { path = "tpt-eve-neural", version = "0.1.0" }
+tpt-eve-causal         = { path = "tpt-eve-causal", version = "0.1.0" }
+tpt-eve-abstraction    = { path = "tpt-eve-abstraction", version = "0.1.0" }
+tpt-eve-active-learning = { path = "tpt-eve-active-learning", version = "0.1.0" }
+tpt-eve-metacognition  = { path = "tpt-eve-metacognition", version = "0.1.0" }

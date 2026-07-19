@@ -1,0 +1,15 @@
+[package]
+name = "tpt-eve-dsl"
+description = "TPT Eve — Datalog-like rule/query DSL: lexer, parser, AST"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["dsl", "datalog", "parser", "rule-engine", "query-language"]
+categories = ["parser-implementations"]
+rust-version.workspace = true
+
+[dependencies]

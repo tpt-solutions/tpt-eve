@@ -1,0 +1,19 @@
+[package]
+name        = "tpt-eve-abstraction"
+description = "TPT Eve — Phase 3 abstraction layer: pattern mining, analogical mapping, principle generalization, knowledge transfer"
+version.workspace     = true
+edition.workspace     = true
+license.workspace     = true
+authors.workspace     = true
+repository.workspace  = true
+homepage.workspace     = true
+readme                 = "README.md"
+keywords               = ["analogy", "pattern-mining", "knowledge-transfer", "generalization", "abstraction"]
+categories             = ["algorithms", "science"]
+rust-version.workspace = true
+
+[dependencies]
+tpt-eve-core = { workspace = true }
+serde     = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }

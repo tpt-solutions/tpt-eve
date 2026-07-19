@@ -1,0 +1,20 @@
+[package]
+name        = "tpt-eve-causal"
+description = "TPT Eve — Phase 2 causal reasoning engine: DAG construction, intervention calculus, counterfactual simulation"
+version.workspace     = true
+edition.workspace     = true
+license.workspace     = true
+authors.workspace     = true
+repository.workspace  = true
+homepage.workspace     = true
+readme                 = "README.md"
+keywords               = ["causal-inference", "causal-graph", "counterfactual", "dag", "intervention"]
+categories             = ["algorithms", "science"]
+rust-version.workspace = true
+
+[dependencies]
+tpt-eve-core = { workspace = true }
+serde        = { workspace = true }
+serde_json   = { workspace = true }
+thiserror    = { workspace = true }
+tracing      = { workspace = true }

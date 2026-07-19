@@ -1,0 +1,20 @@
+[package]
+name = "tpt-eve-core"
+description = "TPT Eve — shared core types: Fact, Pattern, Value, EveError, CausalRelationDraft"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["symbolic-ai", "cognitive-architecture", "fact", "causal"]
+categories = ["data-structures"]
+rust-version.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }

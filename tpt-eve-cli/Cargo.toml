@@ -1,0 +1,33 @@
+[package]
+name = "tpt-eve-cli"
+description = "TPT Eve — the tpt-eve CLI: extract / demo / ask / repl / serve across all five layers"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["cli", "cognitive-architecture", "llm", "symbolic-ai", "causal-inference"]
+categories = ["command-line-utilities"]
+rust-version.workspace = true
+
+[[bin]]
+name = "tpt-eve"
+path = "src/main.rs"
+
+[dependencies]
+tpt-eve-core = { workspace = true }
+tpt-eve-dsl = { workspace = true }
+tpt-eve-symbolic = { workspace = true }
+tpt-eve-neural = { workspace = true }
+tpt-eve-causal          = { workspace = true }
+tpt-eve-abstraction     = { workspace = true }
+tpt-eve-active-learning = { workspace = true }
+tpt-eve-metacognition   = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+indicatif = { workspace = true }
+axum = { workspace = true }
+tokio = { workspace = true }
