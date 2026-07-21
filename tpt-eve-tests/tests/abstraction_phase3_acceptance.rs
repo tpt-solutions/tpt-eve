@@ -2,8 +2,8 @@ use tpt_eve_abstraction::{AbstractionEngine, AnalogyMapper, PatternMiner};
 use tpt_eve_core::{Fact, Value};
 use tpt_eve_neural::{MockNeuralLayer, NeuralPatternLayer};
 
-/// Phase 3 acceptance tests: extract abstract principles, find cross-domain analogies,
-/// transfer knowledge.  All tests run synchronously or with the mock backend (no live LLM).
+// Phase 3 acceptance tests: extract abstract principles, find cross-domain analogies,
+// transfer knowledge.  All tests run synchronously or with the mock backend (no live LLM).
 
 // ---------------------------------------------------------------------------
 // Helpers

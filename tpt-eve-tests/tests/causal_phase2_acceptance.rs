@@ -7,7 +7,6 @@ use tpt_eve_neural::{MockNeuralLayer, NeuralPatternLayer};
 /// Phase 2 acceptance tests: build causal graphs, predict interventions, answer "what if".
 ///
 /// Uses the study-hours → exam-score domain from spec.txt.
-
 fn build_study_engine() -> CausalReasoningEngine {
     let mut engine = CausalReasoningEngine::new();
     engine.add_relation(CausalRelationDraft {
