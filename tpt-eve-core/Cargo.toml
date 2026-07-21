@@ -8,7 +8,7 @@ authors.workspace = true
 repository.workspace = true
 homepage.workspace = true
 readme = "README.md"
-keywords = ["symbolic-ai", "cognitive-architecture", "fact", "causal"]
+keywords = ["symbolic-ai", "cognitive-arch", "fact", "causal"]
 categories = ["data-structures"]
 rust-version.workspace = true
 

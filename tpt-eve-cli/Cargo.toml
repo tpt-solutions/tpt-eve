@@ -8,7 +8,7 @@ authors.workspace = true
 repository.workspace = true
 homepage.workspace = true
 readme = "README.md"
-keywords = ["cli", "cognitive-architecture", "llm", "symbolic-ai", "causal-inference"]
+keywords = ["cli", "cognitive-arch", "llm", "symbolic-ai", "causal-inference"]
 categories = ["command-line-utilities"]
 rust-version.workspace = true
 
