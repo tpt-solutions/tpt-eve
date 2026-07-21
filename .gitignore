@@ -14,3 +14,4 @@ Cargo.lock
 # OS
 Thumbs.db
 desktop.ini
+.mimocode/.cron-lock
