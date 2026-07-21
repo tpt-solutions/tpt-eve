@@ -322,7 +322,7 @@ mod tests {
         g.add_edge(make_edge("sleep", "examScore")).unwrap();
 
         // examScore = 10*studyHours + 5*sleep + 0
-        let data = vec![
+        let data = [
             (3.0_f64, 6.0_f64, 60.0_f64),
             (5.0, 8.0, 90.0),
             (7.0, 7.0, 105.0),
