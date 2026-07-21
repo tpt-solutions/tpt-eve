@@ -1,0 +1,24 @@
+// A multi-rule program demonstrating chaining and multiple predicates.
+
+// Facts
+TypeScript is "programming language".
+Python is "programming language".
+Rust is "systems language".
+"programming language" has "syntax".
+"programming language" has "type system".
+"systems language" has "memory safety".
+TypeScript provides "compile-time type checking".
+Python provides "dynamic typing".
+Rust provides "zero-cost abstractions".
+
+// Rule: languages inherit properties from their category
+rule category_inherits {
+  if X is Y, Y has Z
+  then X has Z
+}
+
+// Rule: transitive "part_of" relation
+rule transitive_part_of {
+  if X part_of Y, Y part_of Z
+  then X part_of Z
+}

@@ -82,10 +82,22 @@ impl Default for WorkingMemoryStore {
             .unwrap_or_else(|| PathBuf::from(".tpt_eve_working_memory.redb"));
 
         if let Some(parent) = path.parent() {
-            let _ = std::fs::create_dir_all(parent);
+            if let Err(e) = std::fs::create_dir_all(parent) {
+                eprintln!("Warning: could not create {}: {e}", parent.display());
+            }
         }
 
-        Self::new(path).expect("Failed to create default store")
+        match Self::new(path) {
+            Ok(store) => store,
+            Err(e) => {
+                eprintln!("Error: {e}");
+                eprintln!(
+                    "Could not open default working memory store. \
+                     Run `eve extract --save <file>` to create a session first."
+                );
+                std::process::exit(1);
+            }
+        }
     }
 }
 

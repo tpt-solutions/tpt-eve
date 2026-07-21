@@ -17,3 +17,7 @@ tpt-eve-core = { workspace = true }
 serde     = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
+
+[[example]]
+name = "abstraction_demo"
+path = "examples/abstraction_demo.rs"

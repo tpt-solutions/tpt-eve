@@ -17,8 +17,7 @@ Text to analyze:
     )
 }
 
-/// Format a causal extraction prompt with the given text. (Phase 2 — not yet called.)
-#[allow(dead_code)]
+/// Format a causal extraction prompt with the given text.
 pub fn format_causal_prompt(text: &str) -> String {
     format!(
         r#"Extract causal relationships from the following text. For each relationship, output a JSON object with "cause", "effect", and "relation" (causes|precedes|enables|prevents) fields. Return a JSON array.

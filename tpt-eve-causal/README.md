@@ -15,6 +15,14 @@ construction, structural causal models, intervention calculus, and counterfactua
 See the [workspace README](https://github.com/tpt-solutions/tpt-eve#readme) for the full
 architecture and CLI.
 
+## Related crates
+
+For standalone, stats/ML-driven causal discovery (NOTEARS, PC/GES, causal forests, do-calculus over
+tabular data), see [deep_causality](https://crates.io/crates/deep_causality) or
+[causal-hub](https://crates.io/crates/causal-hub) — both more general than this crate.
+`tpt-eve-causal` is narrower by design: it builds and reasons over DAGs assembled from
+`tpt-eve-core::CausalRelationDraft`s produced by LLM extraction, not from raw observational datasets.
+
 ## License
 
 Licensed under either of [MIT](https://github.com/tpt-solutions/tpt-eve/blob/master/LICENSE-MIT)

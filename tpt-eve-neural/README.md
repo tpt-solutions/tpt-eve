@@ -19,6 +19,15 @@ neither needs a live LLM process or an API key.
 See the [workspace README](https://github.com/tpt-solutions/tpt-eve#readme) for the full
 architecture and CLI.
 
+## Related crates
+
+Not a general-purpose multi-provider chat client — see [llm](https://crates.io/crates/llm),
+[rllm](https://crates.io/crates/rllm), or [llm-connector](https://crates.io/crates/llm-connector)
+for that (10+ providers vs. the four backends here). `tpt-eve-neural`'s differentiator is the
+`NeuralPatternLayer` trait's extraction-specific shape (`extract_facts`, `extract_causal_relations`
+returning `tpt-eve-core` types directly) and the `SparkNeuralLayer` backend, which talks to
+tpt-spark's local JSON-RPC socket — no other crate integrates with tpt-spark.
+
 ## License
 
 Licensed under either of [MIT](https://github.com/tpt-solutions/tpt-eve/blob/master/LICENSE-MIT)

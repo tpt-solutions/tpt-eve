@@ -1,6 +1,6 @@
 [package]
 name        = "tpt-eve-causal"
-description = "TPT Eve — Phase 2 causal reasoning engine: DAG construction, intervention calculus, counterfactual simulation"
+description = "TPT Eve — Phase 2 causal reasoning engine: DAG construction, intervention calculus, and counterfactual simulation over LLM-extracted CausalRelationDrafts (see deep_causality/causal-hub for standalone stats-driven causal discovery)"
 version.workspace     = true
 edition.workspace     = true
 license.workspace     = true
@@ -18,3 +18,7 @@ serde        = { workspace = true }
 serde_json   = { workspace = true }
 thiserror    = { workspace = true }
 tracing      = { workspace = true }
+
+[[example]]
+name = "causal_demo"
+path = "examples/causal_demo.rs"

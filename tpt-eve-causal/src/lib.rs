@@ -1,4 +1,10 @@
-﻿// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//! Causal reasoning layer for TPT Eve.
+//!
+//! DAG-based causal graph construction, structural causal models with
+//! multivariate OLS, intervention calculus (do-operator via mutilated graph),
+//! counterfactual simulation (Pearl's abduction-action-prediction), and
+//! confounder identification.
 mod builder;
 mod confounder;
 mod counterfactual;

@@ -1,4 +1,10 @@
-﻿// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//! Meta-cognition layer for TPT Eve.
+//!
+//! Confidence tracking across fact/inference/belief types, knowledge-gap
+//! detection, strategic learning-priority decisions, understanding-level
+//! monitoring, and clarification-request generation — all behind
+//! [`MetaCognitionEngine`].
 mod confidence;
 mod knowledge_gap;
 mod layer;

@@ -19,6 +19,15 @@ memory, forward-chaining inference, consistency checking, and question answering
 See the [workspace README](https://github.com/tpt-solutions/tpt-eve#readme) for the full
 architecture and CLI.
 
+## Related crates
+
+Not a general-purpose Datalog/rule engine — see [crepe](https://crates.io/crates/crepe),
+[ascent](https://crates.io/crates/ascent), or [rust-rule-engine](https://crates.io/crates/rust-rule-engine)
+for that (all more mature, and RETE/incremental where this crate does naive fixpoint recomputation
+each forward-chain pass). `tpt-eve-symbolic`'s value is the fact model itself — facts carry
+`FactSource` provenance and a confidence score baked into `tpt-eve-core::Fact`, which those crates
+don't provide.
+
 ## License
 
 Licensed under either of [MIT](https://github.com/tpt-solutions/tpt-eve/blob/master/LICENSE-MIT)

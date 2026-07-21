@@ -2,7 +2,7 @@
 use crate::{prompts, CloudProvider, Embedding, NeuralPatternLayer};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use tpt_eve_core::{EveError, Fact, FactSource, Value};
+use tpt_eve_core::{CausalRelationDraft, CausalRelationKind, EveError, Fact, FactSource, Value};
 
 // ── Anthropic types ──────────────────────────────────────────────────────────
 
@@ -87,6 +87,13 @@ struct RawFact {
     object: String,
 }
 
+#[derive(Debug, Deserialize)]
+struct RawCausalRelation {
+    cause: String,
+    effect: String,
+    relation: String,
+}
+
 fn parse_facts(text: &str) -> Result<Vec<Fact>, EveError> {
     let start = text.find('[').unwrap_or(0);
     let end = text.rfind(']').map(|i| i + 1).unwrap_or(text.len());
@@ -105,6 +112,35 @@ fn parse_facts(text: &str) -> Result<Vec<Fact>, EveError> {
             confidence: 0.9,
         })
         .collect())
+}
+
+fn parse_causal_relations(text: &str) -> Result<Vec<CausalRelationDraft>, EveError> {
+    let start = text.find('[').unwrap_or(0);
+    let end = text.rfind(']').map(|i| i + 1).unwrap_or(text.len());
+    let slice = &text[start..end];
+
+    let raw: Vec<RawCausalRelation> = serde_json::from_str(slice).map_err(|e| {
+        EveError::ExtractionParseFailed(format!("Failed to parse causal relations: {e}"))
+    })?;
+
+    raw.into_iter()
+        .map(|r| {
+            let kind = match r.relation.as_str() {
+                "causes" => Ok(CausalRelationKind::Causes),
+                "precedes" => Ok(CausalRelationKind::Precedes),
+                "enables" => Ok(CausalRelationKind::Enables),
+                "prevents" => Ok(CausalRelationKind::Prevents),
+                other => Err(EveError::ExtractionParseFailed(format!(
+                    "Unknown causal relation kind: {other}"
+                ))),
+            }?;
+            Ok(CausalRelationDraft {
+                cause: r.cause,
+                effect: r.effect,
+                relation: kind,
+            })
+        })
+        .collect()
 }
 
 // ── CloudNeuralLayer ─────────────────────────────────────────────────────────
@@ -238,6 +274,15 @@ impl NeuralPatternLayer for CloudNeuralLayer {
         let prompt = prompts::format_fact_prompt(text);
         let response = self.complete(&prompt).await?;
         parse_facts(&response)
+    }
+
+    async fn extract_causal_relations(
+        &self,
+        text: &str,
+    ) -> Result<Vec<CausalRelationDraft>, EveError> {
+        let prompt = prompts::format_causal_prompt(text);
+        let response = self.complete(&prompt).await?;
+        parse_causal_relations(&response)
     }
 
     async fn embed(&self, text: &str) -> Result<Embedding, EveError> {

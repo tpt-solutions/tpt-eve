@@ -1,6 +1,6 @@
 [package]
 name = "tpt-eve-dsl"
-description = "TPT Eve — Datalog-like rule/query DSL: lexer, parser, AST"
+description = "TPT Eve — Datalog-like rule/query DSL: lexer, parser, AST for tpt-eve-symbolic (not a standalone Datalog engine — see crepe/ascent for that)"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

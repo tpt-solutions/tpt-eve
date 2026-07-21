@@ -1,6 +1,6 @@
 [package]
 name = "tpt-eve-symbolic"
-description = "TPT Eve — Phase 1 symbolic reasoning: working memory, forward-chaining inference, consistency checking"
+description = "TPT Eve — Phase 1 symbolic reasoning: working memory, forward-chaining inference, and consistency checking over provenance/confidence-scored facts (not a general-purpose Datalog engine — see crepe/ascent for that)"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -20,6 +20,10 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 redb = { workspace = true }
 dirs = { workspace = true }
+
+[[example]]
+name = "basic_usage"
+path = "examples/basic_usage.rs"
 
 [dev-dependencies]
 tempfile = { workspace = true }

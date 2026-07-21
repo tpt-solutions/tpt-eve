@@ -1,0 +1,30 @@
+// Biology domain example — non-programming knowledge.
+
+cat is "mammal".
+dog is "mammal".
+eagle is "bird".
+salmon is "fish".
+
+"mammal" has "fur".
+"mammal" is_a "animal".
+"bird" has "feathers".
+"bird" is_a "animal".
+"fish" has "scales".
+"fish" is_a "animal".
+
+cat "lives_on" "land".
+dog "lives_on" "land".
+eagle "lives_in" "sky".
+salmon "lives_in" "water".
+
+// Transitive: if X is Y, Y has Z, then X has Z
+rule inherits_property {
+  if X is Y, Y has Z
+  then X has Z
+}
+
+// Transitive: if X is Y, Y is_a Z, then X is_a Z
+rule transitive_category {
+  if X is Y, Y is_a Z
+  then X is_a Z
+}

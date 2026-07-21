@@ -1,7 +1,7 @@
-﻿// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: MIT OR Apache-2.0
 use crate::{Embedding, NeuralPatternLayer, SimilarityResult};
 use async_trait::async_trait;
-use tpt_eve_core::{EveError, Fact, FactSource, Value};
+use tpt_eve_core::{CausalRelationDraft, EveError, Fact, FactSource, Value};
 
 /// Mock NeuralPatternLayer for testing/demos. Returns deterministic facts
 /// for the TypeScript example from spec.txt.
@@ -9,15 +9,30 @@ use tpt_eve_core::{EveError, Fact, FactSource, Value};
 pub struct MockNeuralLayer {
     /// Optional override for extracted facts.
     facts: Option<Vec<Fact>>,
+    /// Optional override for extracted causal relations.
+    relations: Option<Vec<CausalRelationDraft>>,
 }
 
 impl MockNeuralLayer {
     pub fn new() -> Self {
-        MockNeuralLayer { facts: None }
+        MockNeuralLayer {
+            facts: None,
+            relations: None,
+        }
     }
 
     pub fn with_facts(facts: Vec<Fact>) -> Self {
-        MockNeuralLayer { facts: Some(facts) }
+        MockNeuralLayer {
+            facts: Some(facts),
+            relations: None,
+        }
+    }
+
+    pub fn with_relations(relations: Vec<CausalRelationDraft>) -> Self {
+        MockNeuralLayer {
+            facts: None,
+            relations: Some(relations),
+        }
     }
 }
 
@@ -61,6 +76,29 @@ impl NeuralPatternLayer for MockNeuralLayer {
         }
     }
 
+    async fn extract_causal_relations(
+        &self,
+        _text: &str,
+    ) -> Result<Vec<CausalRelationDraft>, EveError> {
+        if let Some(ref relations) = self.relations {
+            return Ok(relations.clone());
+        }
+        // Return deterministic causal relations for the TypeScript example
+        use tpt_eve_core::CausalRelationKind;
+        Ok(vec![
+            CausalRelationDraft {
+                cause: "TypeScript".into(),
+                effect: "JavaScript".into(),
+                relation: CausalRelationKind::Causes,
+            },
+            CausalRelationDraft {
+                cause: "TypeScript".into(),
+                effect: "compile-time type checking".into(),
+                relation: CausalRelationKind::Enables,
+            },
+        ])
+    }
+
     async fn embed(&self, _text: &str) -> Result<Embedding, EveError> {
         // Return a dummy embedding for testing
         Ok(Embedding(vec![0.1; 384]))
@@ -101,5 +139,13 @@ mod tests {
         let mock = MockNeuralLayer::new();
         let emb = mock.embed("test").await.unwrap();
         assert_eq!(emb.0.len(), 384);
+    }
+
+    #[tokio::test]
+    async fn extracts_causal_relations() {
+        let mock = MockNeuralLayer::new();
+        let relations = mock.extract_causal_relations("anything").await.unwrap();
+        assert_eq!(relations.len(), 2);
+        assert_eq!(relations[0].cause, "TypeScript");
     }
 }

@@ -22,6 +22,16 @@ enum OutputFormat {
     Json,
 }
 
+#[derive(ValueEnum, Clone, Debug)]
+enum Backend {
+    Mock,
+    Spark,
+    Ollama,
+    Anthropic,
+    OpenAi,
+    OpenRouter,
+}
+
 #[derive(Parser)]
 #[command(name = "tpt-eve")]
 #[command(version, about = "TPT Eve cognitive architecture CLI")]
@@ -37,8 +47,8 @@ enum Commands {
         /// Text to extract facts from
         text: String,
         /// Backend: mock, spark, ollama, anthropic, openai, openrouter
-        #[arg(short, long, default_value = "mock")]
-        backend: String,
+        #[arg(short, long, value_enum, default_value = "mock")]
+        backend: Backend,
         /// Override the model used by cloud/ollama backends
         #[arg(long)]
         model: Option<String>,
@@ -52,8 +62,8 @@ enum Commands {
     /// Run the Phase 1 demo pipeline (extract → infer → ask)
     Demo {
         /// Backend: mock, spark, ollama, anthropic, openai, openrouter
-        #[arg(short, long, default_value = "mock")]
-        backend: String,
+        #[arg(short, long, value_enum, default_value = "mock")]
+        backend: Backend,
         /// Override the model used by cloud/ollama backends
         #[arg(long)]
         model: Option<String>,
@@ -79,8 +89,8 @@ enum Commands {
     /// Answer a "what if" question using causal reasoning (Phase 2 demo)
     Whatif {
         /// Backend: mock, spark, ollama, anthropic, openai, openrouter
-        #[arg(short, long, default_value = "mock")]
-        backend: String,
+        #[arg(short, long, value_enum, default_value = "mock")]
+        backend: Backend,
         /// Override the model used by cloud/ollama backends
         #[arg(long)]
         model: Option<String>,
@@ -89,11 +99,7 @@ enum Commands {
         graph: bool,
     },
     /// Demonstrate Phase 3 abstraction: pattern mining, analogical mapping, knowledge transfer
-    Abstract {
-        /// Backend: mock, spark, ollama, anthropic, openai, openrouter (for embed-based similarity)
-        #[arg(short, long, default_value = "mock")]
-        backend: String,
-    },
+    Abstract,
     /// Demonstrate Phase 4 active learning: hypothesis generation, experiment, belief updating
     Learn,
     /// Demonstrate Phase 5 meta-cognition: confidence tracking, gap detection, learning agenda
@@ -101,8 +107,11 @@ enum Commands {
     /// Start an HTTP REST API server exposing the cognitive pipeline
     Serve {
         /// Backend for /extract: mock, spark, ollama, anthropic, openai, openrouter
-        #[arg(short, long, default_value = "mock")]
-        backend: String,
+        #[arg(short, long, value_enum, default_value = "mock")]
+        backend: Backend,
+        /// Bind address (default: 127.0.0.1)
+        #[arg(long, default_value = "127.0.0.1")]
+        bind: String,
         /// Port to listen on
         #[arg(short, long, default_value = "3737")]
         port: u16,
@@ -111,6 +120,11 @@ enum Commands {
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .with_writer(std::io::stderr)
+        .init();
+
     let cli = Cli::parse();
 
     match cli.command {
@@ -162,14 +176,18 @@ async fn main() {
             }
         }
 
-        Commands::Abstract { backend } => {
-            run_abstract(&backend);
+        Commands::Abstract => {
+            run_abstract();
         }
 
         Commands::Learn => run_learn(),
         Commands::Reflect => run_reflect(),
-        Commands::Serve { backend, port } => {
-            run_serve(&backend, port).await;
+        Commands::Serve {
+            backend,
+            bind,
+            port,
+        } => {
+            run_serve(&backend, &bind, port).await;
         }
 
         Commands::Ask { question, load } => {
@@ -276,40 +294,39 @@ fn load_layer_for_ask(load: Option<std::path::PathBuf>) -> SymbolicReasoningLaye
     layer
 }
 
-fn build_backend(backend: &str, model: Option<&str>) -> Box<dyn NeuralPatternLayer> {
-    let layer: Box<dyn NeuralPatternLayer> = match backend {
-        "spark" => Box::new(SparkNeuralLayer::new()),
-        "ollama" => {
+fn build_backend(backend: &Backend, model: Option<&str>) -> Box<dyn NeuralPatternLayer> {
+    match backend {
+        Backend::Mock => Box::new(MockNeuralLayer::new()),
+        Backend::Spark => Box::new(SparkNeuralLayer::new()),
+        Backend::Ollama => {
             let mut b = OllamaNeuralLayer::new();
             if let Some(m) = model {
                 b = b.with_model(m);
             }
             Box::new(b)
         }
-        "anthropic" => {
+        Backend::Anthropic => {
             let mut b = CloudNeuralLayer::from_env(CloudProvider::Anthropic);
             if let Some(m) = model {
                 b = b.with_model(m);
             }
             Box::new(b)
         }
-        "openai" => {
+        Backend::OpenAi => {
             let mut b = CloudNeuralLayer::from_env(CloudProvider::OpenAi);
             if let Some(m) = model {
                 b = b.with_model(m);
             }
             Box::new(b)
         }
-        "openrouter" => {
+        Backend::OpenRouter => {
             let mut b = CloudNeuralLayer::from_env(CloudProvider::OpenRouter);
             if let Some(m) = model {
                 b = b.with_model(m);
             }
             Box::new(b)
         }
-        _ => Box::new(MockNeuralLayer::new()),
-    };
-    layer
+    }
 }
 
 // ── Spinner + retry ───────────────────────────────────────────────────────────
@@ -458,7 +475,7 @@ fn run_repl() {
 
 // ── Phase 2: causal reasoning ─────────────────────────────────────────────────
 
-async fn run_whatif(backend: &str, model: Option<&str>) {
+async fn run_whatif(backend: &Backend, model: Option<&str>) {
     let neural = build_backend(backend, model);
 
     println!("=== Phase 2: Causal Reasoning Demo ===\n");
@@ -559,7 +576,7 @@ async fn run_whatif(backend: &str, model: Option<&str>) {
     }
 }
 
-async fn run_whatif_dot(backend: &str, model: Option<&str>) {
+async fn run_whatif_dot(backend: &Backend, model: Option<&str>) {
     let neural = build_backend(backend, model);
 
     let text = "Studying more hours causes higher exam scores. \
@@ -615,9 +632,7 @@ async fn run_whatif_dot(backend: &str, model: Option<&str>) {
 
 // ── Phase 3: abstraction ─────────────────────────────────────────────────────
 
-fn run_abstract(backend: &str) {
-    let _ = backend; // backend flag available for future embedding-based similarity
-
+fn run_abstract() {
     println!("=== Phase 3: Abstraction Demo ===\n");
 
     let lang_facts = |name: &str| -> Vec<Fact> {
@@ -894,7 +909,7 @@ fn run_reflect() {
 
 // ── eve serve ─────────────────────────────────────────────────────────────────
 
-async fn run_serve(backend: &str, port: u16) {
+async fn run_serve(backend: &Backend, bind: &str, port: u16) {
     use axum::{
         extract::State,
         http::StatusCode,
@@ -908,7 +923,7 @@ async fn run_serve(backend: &str, port: u16) {
     #[derive(Clone)]
     struct AppState {
         wm: Arc<Mutex<WorkingMemory>>,
-        backend: Arc<String>,
+        backend: Arc<Backend>,
     }
 
     #[derive(Deserialize)]
@@ -979,7 +994,7 @@ async fn run_serve(backend: &str, port: u16) {
 
     let state = AppState {
         wm: Arc::new(Mutex::new(WorkingMemory::new())),
-        backend: Arc::new(backend.to_string()),
+        backend: Arc::new(backend.clone()),
     };
 
     let app = Router::new()
@@ -988,21 +1003,28 @@ async fn run_serve(backend: &str, port: u16) {
         .route("/facts", get(route_facts))
         .with_state(state);
 
-    let addr = format!("0.0.0.0:{port}");
+    let addr = format!("{bind}:{port}");
     println!("TPT Eve HTTP server listening on http://{addr}");
     println!("  POST /extract  {{\"text\": \"...\"}}       → [facts]");
     println!("  POST /ask      {{\"question\": \"...\"}}   → {{\"answer\": ...}}");
     println!("  GET  /facts                             → [all asserted facts]");
 
-    let listener = tokio::net::TcpListener::bind(&addr)
-        .await
-        .expect("Failed to bind TCP listener");
-    axum::serve(listener, app).await.expect("Server error");
+    let listener = match tokio::net::TcpListener::bind(&addr).await {
+        Ok(l) => l,
+        Err(e) => {
+            eprintln!("Failed to bind to {addr}: {e}");
+            std::process::exit(1);
+        }
+    };
+    if let Err(e) = axum::serve(listener, app).await {
+        eprintln!("Server error: {e}");
+        std::process::exit(1);
+    }
 }
 
 // ── Phase 1: demo pipeline ────────────────────────────────────────────────────
 
-async fn run_demo(backend: &str, model: Option<&str>) {
+async fn run_demo(backend: &Backend, model: Option<&str>) {
     let neural = build_backend(backend, model);
     let mut layer = SymbolicReasoningLayer::new();
 

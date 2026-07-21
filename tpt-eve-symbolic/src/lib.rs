@@ -1,4 +1,10 @@
-﻿// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//! Symbolic reasoning layer for TPT Eve.
+//!
+//! Provides working memory (fact storage with indexed lookup), forward-chaining
+//! inference via naive fixpoint recomputation, consistency checking, and
+//! question answering. Fact persistence uses an embedded `redb` database at
+//! `~/.tpt/eve/working_memory.redb`.
 mod consistency;
 mod inference;
 mod layer;

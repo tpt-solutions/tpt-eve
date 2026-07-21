@@ -197,3 +197,31 @@ Goal: Improve robustness, usability, and adoption surface. No new cognitive capa
 - [x] `eve serve` — HTTP REST API (axum 0.8): `POST /extract`, `POST /ask`, `GET /facts`
 - [x] `eve explain "<question>"` — show inference provenance chain
 - [x] `eve whatif --graph > graph.dot` — causal graph DOT export
+
+## Phase 7 — Platform Review Follow-ups (2026-07-21) ✓ COMPLETE
+
+Findings from a full codebase review (bugs, adoption friction). See review notes for detail.
+
+### 7.1 Bug fixes
+- [x] Implement `extract_causal_relations` on `MockNeuralLayer` — currently every backend
+      (mock/spark/ollama/cloud) falls through to the trait's `NotSupported` default, so
+      `eve whatif` has never demonstrated real neural→causal extraction on any backend despite
+      the Phase 2 checklist marking that wiring as done
+- [x] Implement `extract_causal_relations` on `CloudNeuralLayer` using the existing
+      `format_causal_prompt` (`tpt-eve-neural/src/prompts.rs`, currently `#[allow(dead_code)]`)
+- [x] Implement `extract_causal_relations` on `OllamaNeuralLayer`
+- [x] Fix `eve serve` bind failure to return a clean CLI error instead of panicking via `.expect()`
+- [x] Default `eve serve` bind address to `127.0.0.1` instead of `0.0.0.0`; add `--bind` flag
+- [x] Reject unrecognized `--backend` values instead of silently defaulting to mock
+- [x] Make missing cloud API key warning visible (install a `tracing_subscriber` in the CLI so
+      the existing `tracing::warn!` in `CloudNeuralLayer::from_env` is actually printed)
+- [x] Wire up or remove the no-op `abstract --backend` flag (`let _ = backend;`)
+- [x] Fix `WorkingMemoryStore::default()` panic-on-error (`.expect(...)` in `persistence.rs`)
+
+### 7.2 Adoption / examples pass
+- [x] Add `examples/` dirs with a runnable `cargo run --example` for `tpt-eve-symbolic`,
+      `tpt-eve-causal`, and `tpt-eve-abstraction`
+- [x] Add 2-4 more `.eve` fixture files (multi-rule program, non-TypeScript domain) plus a
+      "DSL Tour" section with worked examples in `tpt-eve-dsl/README.md`
+- [x] Add crate-level `//!` docs to every `lib.rs` so docs.rs landing pages aren't blank
+- [x] Add a GitHub Actions CI workflow (build + clippy -D warnings + test + fmt --check)

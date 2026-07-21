@@ -1,6 +1,6 @@
 [package]
 name = "tpt-eve-neural"
-description = "TPT Eve — pluggable LLM integration: NeuralPatternLayer trait + tpt-spark/Ollama/cloud/mock backends"
+description = "TPT Eve — pluggable LLM integration: NeuralPatternLayer trait for structured fact/causal-relation extraction (not a general chat-completion client — see llm/rllm/llm-connector for that) + tpt-spark/Ollama/cloud/mock backends"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

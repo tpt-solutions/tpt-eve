@@ -173,16 +173,15 @@ fn identifies_no_confounders_in_simple_chain() {
     assert!(conf.is_empty(), "expected no confounders, got {conf:?}");
 }
 
-/// MockNeuralLayer extract_causal_relations hook: the trait's default returns NotSupported,
-/// but the mock overrides embed/find_similar; test that extract_causal_relations can be
-/// handled gracefully (the mock falls back to the default NotSupported).
+/// MockNeuralLayer extract_causal_relations: returns deterministic fixture data
+/// for the TypeScript causal example.
 #[tokio::test]
-async fn mock_neural_extract_causal_returns_not_supported() {
+async fn mock_neural_extract_causal_returns_relations() {
     let mock = MockNeuralLayer::new();
     let result = mock.extract_causal_relations("test text").await;
-    // Default impl returns NotSupported — CLI handles this gracefully with fixture data
+    let relations = result.expect("mock should return causal relations");
     assert!(
-        result.is_err(),
-        "mock should return NotSupported for causal relations"
+        !relations.is_empty(),
+        "mock should return non-empty relations"
     );
 }

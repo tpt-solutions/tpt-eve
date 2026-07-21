@@ -2,7 +2,7 @@
 use crate::{prompts, Embedding, NeuralPatternLayer, SimilarityResult};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use tpt_eve_core::{EveError, Fact, FactSource, Value};
+use tpt_eve_core::{CausalRelationDraft, CausalRelationKind, EveError, Fact, FactSource, Value};
 
 const DEFAULT_HOST: &str = "http://localhost:11434";
 const DEFAULT_MODEL: &str = "llama3";
@@ -36,6 +36,13 @@ struct RawFact {
     subject: String,
     predicate: String,
     object: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct RawCausalRelation {
+    cause: String,
+    effect: String,
+    relation: String,
 }
 
 /// NeuralPatternLayer backed by a local Ollama server.
@@ -115,6 +122,35 @@ impl OllamaNeuralLayer {
             })
             .collect())
     }
+
+    fn parse_causal_relations(text: &str) -> Result<Vec<CausalRelationDraft>, EveError> {
+        let start = text.find('[').unwrap_or(0);
+        let end = text.rfind(']').map(|i| i + 1).unwrap_or(text.len());
+        let slice = &text[start..end];
+
+        let raw: Vec<RawCausalRelation> = serde_json::from_str(slice).map_err(|e| {
+            EveError::ExtractionParseFailed(format!("Failed to parse causal relations: {e}"))
+        })?;
+
+        raw.into_iter()
+            .map(|r| {
+                let kind = match r.relation.as_str() {
+                    "causes" => Ok(CausalRelationKind::Causes),
+                    "precedes" => Ok(CausalRelationKind::Precedes),
+                    "enables" => Ok(CausalRelationKind::Enables),
+                    "prevents" => Ok(CausalRelationKind::Prevents),
+                    other => Err(EveError::ExtractionParseFailed(format!(
+                        "Unknown causal relation kind: {other}"
+                    ))),
+                }?;
+                Ok(CausalRelationDraft {
+                    cause: r.cause,
+                    effect: r.effect,
+                    relation: kind,
+                })
+            })
+            .collect()
+    }
 }
 
 impl Default for OllamaNeuralLayer {
@@ -129,6 +165,15 @@ impl NeuralPatternLayer for OllamaNeuralLayer {
         let prompt = prompts::format_fact_prompt(text);
         let response = self.generate(&prompt).await?;
         Self::parse_facts(&response)
+    }
+
+    async fn extract_causal_relations(
+        &self,
+        text: &str,
+    ) -> Result<Vec<CausalRelationDraft>, EveError> {
+        let prompt = prompts::format_causal_prompt(text);
+        let response = self.generate(&prompt).await?;
+        Self::parse_causal_relations(&response)
     }
 
     async fn find_similar(
