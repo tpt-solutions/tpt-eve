@@ -4,9 +4,9 @@ use tpt_eve_metacognition::{
     UnderstandingLevel, UnderstandingMonitor,
 };
 
-/// Phase 5 acceptance tests: confidence tracking, knowledge-gap identification,
-/// learning prioritization, and confidence calibration.
-/// All tests run without a live LLM.
+// Phase 5 acceptance tests: confidence tracking, knowledge-gap identification,
+// learning prioritization, and confidence calibration.
+// All tests run without a live LLM.
 
 // ---------------------------------------------------------------------------
 // Helpers

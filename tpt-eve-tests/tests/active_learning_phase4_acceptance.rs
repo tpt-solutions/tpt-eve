@@ -4,8 +4,8 @@ use tpt_eve_active_learning::{
 };
 use tpt_eve_core::{Fact, FactSource, Value};
 
-/// Phase 4 acceptance tests: generate testable hypotheses, run experiments, discover insights.
-/// All tests run without a live LLM.
+// Phase 4 acceptance tests: generate testable hypotheses, run experiments, discover insights.
+// All tests run without a live LLM.
 
 // ---------------------------------------------------------------------------
 // Helpers
