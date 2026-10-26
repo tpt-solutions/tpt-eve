@@ -74,10 +74,24 @@ impl WorkingMemoryStore {
     }
 }
 
+/// The user's home directory, from the environment. `USERPROFILE` is tried first on Windows and
+/// `HOME` elsewhere, so the crate needs no path-lookup dependency.
+fn home_dir() -> Option<PathBuf> {
+    let vars: &[&str] = if cfg!(windows) {
+        &["USERPROFILE", "HOME"]
+    } else {
+        &["HOME"]
+    };
+    vars.iter()
+        .filter_map(std::env::var_os)
+        .find(|value| !value.is_empty())
+        .map(PathBuf::from)
+}
+
 impl Default for WorkingMemoryStore {
     fn default() -> Self {
         // Use default path in user's home directory
-        let path = dirs::home_dir()
+        let path = home_dir()
             .map(|h| h.join(".tpt").join("eve").join("working_memory.redb"))
             .unwrap_or_else(|| PathBuf::from(".tpt_eve_working_memory.redb"));
 
